@@ -17,9 +17,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -40,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         final String username = jwtService.getUsernameFromToken(token);
 
-        System.out.println("Usuario extraído del Token: " + username);
+        log.debug("Usuario extraído correctamente desde el token JWT");
 
         if (username != null
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -48,12 +50,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails =
                     userDetailsService.loadUserByUsername(username);
 
-            System.out.println(
-                    "Usuario cargado de la BD: " + userDetails.getUsername()
-            );
+            log.debug("Usuario cargado para validación del token JWT");
 
             if (jwtService.isTokenValid(token, userDetails)) {
-                System.out.println("¡El Token es totalmente VÁLIDO!");
+                log.debug("Token JWT validado correctamente");
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
@@ -71,9 +71,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .setAuthentication(authToken);
 
             } else {
-                System.out.println(
-                        "Error: El método isTokenValid devolvió FALSE"
-                );
+                log.warn("Token JWT no válido");
             }
         }
 
