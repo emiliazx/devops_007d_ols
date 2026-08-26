@@ -28,7 +28,8 @@ public class AutentificacionController {
                description = "Crea una cuenta de usuario con rol USER y devuelve confirmación.")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Usuario registrado correctamente"),
-        @ApiResponse(responseCode = "400", description = "Datos inválidos o username duplicado"),
+        @ApiResponse(responseCode = "400", description = "Datos de registro inválidos"),
+        @ApiResponse(responseCode = "409", description = "Username o correo electrónico ya registrado"),
         @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PostMapping("/register")

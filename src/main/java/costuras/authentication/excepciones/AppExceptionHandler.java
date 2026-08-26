@@ -16,7 +16,7 @@ public class AppExceptionHandler {
     
     @ExceptionHandler(EmailDuplicatedException.class)
     public ResponseEntity<Map<String, String>> handleEmailAlreadyInUse(EmailDuplicatedException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
     }
 
     
