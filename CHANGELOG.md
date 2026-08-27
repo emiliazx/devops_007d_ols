@@ -12,6 +12,14 @@ Actualmente no existen cambios pendientes para una próxima versión.
 
 ---
 
+## [1.0.1] - 2026-08-26
+
+### Corregido
+
+- Se corrigió la validación del prefijo `Bearer ` en el encabezado de autorización para procesar correctamente los tokens JWT.
+
+---
+
 ## [1.0.0] - 2026-08-26
 
 ### Añadido
