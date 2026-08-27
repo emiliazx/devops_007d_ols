@@ -8,7 +8,15 @@ Mientras los cambios permanezcan en desarrollo y no hayan sido integrados en una
 
 ## [Sin publicar]
 
-Actualmente no existen cambios pendientes para una próxima versión.
+### Documentación
+
+- Se actualizó `README.md` para reflejar el estado actual del proyecto y las versiones `v1.0.0` y `v1.0.1`.
+- Se completó la justificación de la estrategia GitFlow utilizada durante el desarrollo.
+- Se documentaron los cambios colaborativos realizados mediante ramas `feature/*`, `ci/*`, `refactor/*`, `docs/*` y `hotfix/*`.
+- Se amplió la documentación de trazabilidad del flujo colaborativo y de los comandos Git utilizados.
+- Se actualizó la documentación del hotfix `hotfix/corregir-prefijo-bearer`.
+- Se actualizó la declaración sobre el uso de inteligencia artificial, incluyendo su utilización como apoyo para organizar contenidos y dar formato Markdown a textos redactados por el equipo.
+- Se incorporaron las reflexiones individuales de ambos integrantes.
 
 ---
 
