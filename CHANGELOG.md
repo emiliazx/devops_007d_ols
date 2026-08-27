@@ -8,6 +8,12 @@ Mientras los cambios permanezcan en desarrollo y no hayan sido integrados en una
 
 ## [Sin publicar]
 
+Actualmente no existen cambios pendientes para una próxima versión.
+
+---
+
+## [1.0.0] - 2026-08-26
+
 ### Añadido
 
 - Se agregó un endpoint para consultar información básica del microservicio.
