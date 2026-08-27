@@ -649,12 +649,15 @@ Las reflexiones individuales y conclusiones personales fueron redactadas directa
 # Conclusiones y reflexiones individuales
 
 ## Reflexión de Emilia Zamora
+Sinceramente, antes de esta evaluación usaba Git solo para guardar mi propio avance y no entendia bien cómo organizarse en equipo para no armar un enredo en el repositorio. Pasar a un flujo real me hizo cambiar el perspectiva: entendí el sentido de trabajar con ramas separadas, enviar Pull Requests a develop y ver cómo GitHub Actions testeaba el proyecto para no cometer un gran error con el código
+Mi aporte estuvo enfocado en cuidar la calidad de las integraciones, apoyando en la revisión de los cambios y cuidando que los commits fueran limpios para llegar juntos a la versión final en main
 
-> **Redactar personalmente sin apoyo de IA.**
->
-> La reflexión debe explicar el aprendizaje obtenido durante la evaluación y la contribución personal realizada al proyecto.
+La parte más compleja fue cuando estabamos trabajando en la misma ramas y se nos volvio loco el git 
+no entendia que estaba pasando con el  entorno local y  el remoto. Nos complicamos un poco con los conflictos, pero con mucha investigacion logramos resolverlo, revisar con calma el árbol de commits y aprender a sincronizar bien antes de seguir subiendo cambios.
 
----
+Al final me di cuenta de que Git no se trata de memorizar comandos, sino de entender la lógica detrás de cada paso. Me quedo con la tranquilidad de haberle perdido el miedo a la herramienta y saber que quedé con una base súper sólida para sumarme a cualquier equipo a futuro.
+
+
 
 ## Reflexión de Vicente Riquelme
 
