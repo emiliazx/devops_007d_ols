@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SeguridadConfiguracion {
 
-    private final JwAuthenticationFilter jwAuthenticationFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authProvider;
 
     @Bean
@@ -37,7 +37,7 @@ public class SeguridadConfiguracion {
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authenticationProvider(authProvider)
-            .addFilterBefore(jwAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
     }
 }

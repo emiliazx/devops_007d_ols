@@ -15,5 +15,6 @@ public interface AutentificacionRepo extends JpaRepository<User,Integer> {
     boolean existsByUsername(String username);
 
     Optional<User> findByEmail(String email);
-    
+
+    boolean existsByEmail(String email);
 }

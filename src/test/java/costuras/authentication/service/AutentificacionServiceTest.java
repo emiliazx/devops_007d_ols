@@ -6,6 +6,7 @@ package costuras.authentication.service;
     import costuras.authentication.dto.LoginRequest;
     import costuras.authentication.dto.RegisterRequest;
     import costuras.authentication.excepciones.UsernameDuplicatedException;
+    import costuras.authentication.excepciones.EmailDuplicatedException;
     import costuras.authentication.model.Role;
     import costuras.authentication.model.User;
     import costuras.authentication.repository.AutentificacionRepo;
@@ -93,6 +94,21 @@ import java.util.Optional;
             verify(autentificacionRepo, never()).save(any());
             verify(jwtService, never()).getToken(any());
         }
+
+        @Test
+        void register_emailDuplicado_debeLanzarExcepcion() {
+
+            when(autentificacionRepo.existsByUsername("juanperez")).thenReturn(false);
+
+            when(autentificacionRepo.existsByEmail("juan@mail.com")).thenReturn(true);
+
+            assertThatThrownBy(() -> autentificacionService.register(registerRequest))
+                    .isInstanceOf(EmailDuplicatedException.class)
+                    .hasMessageContaining("correo electrónico ya está en uso");
+
+            verify(autentificacionRepo, never()).save(any());
+            verify(jwtService, never()).getToken(any());
+        }
     
         // ---------- login ----------
     
@@ -164,6 +180,22 @@ import java.util.Optional;
                     .isInstanceOf(UsernameDuplicatedException.class);
     
             verify(autentificacionRepo, never()).save(any());
+        }
+
+        @Test
+        void registerAdmin_emailDuplicado_debeLanzarExcepcion() {
+
+            when(autentificacionRepo.existsByUsername("juanperez")).thenReturn(false);
+
+            when(autentificacionRepo.existsByEmail("juan@mail.com")).thenReturn(true);
+
+            assertThatThrownBy(() ->
+                    autentificacionService.registerAdmin(registerRequest))
+                    .isInstanceOf(EmailDuplicatedException.class)
+                    .hasMessageContaining("correo electrónico ya está en uso");
+
+            verify(autentificacionRepo, never()).save(any());
+            verify(jwtService, never()).getToken(any());
         }
     }
 

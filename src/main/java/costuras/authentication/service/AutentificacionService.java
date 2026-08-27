@@ -10,6 +10,7 @@ import costuras.authentication.dto.AutentificacionResponse;
 import costuras.authentication.dto.LoginRequest;
 import costuras.authentication.dto.RegisterRequest;
 import costuras.authentication.excepciones.UsernameDuplicatedException;
+import costuras.authentication.excepciones.EmailDuplicatedException;
 import costuras.authentication.model.Role;
 import costuras.authentication.model.User;
 import costuras.authentication.repository.AutentificacionRepo;
@@ -30,6 +31,11 @@ public class AutentificacionService {
         if (autentificacionRepo.existsByUsername(request.getUsername())) {
             throw new UsernameDuplicatedException("El nombre de usuario ya está en uso");
         }
+
+        if (autentificacionRepo.existsByEmail(request.getEmail())) {
+            throw new EmailDuplicatedException("El correo electrónico ya está en uso");
+        }
+
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
@@ -57,6 +63,11 @@ public class AutentificacionService {
         if (autentificacionRepo.existsByUsername(request.getUsername())) {
             throw new UsernameDuplicatedException("El nombre de usuario ya está en uso");
         }
+
+        if (autentificacionRepo.existsByEmail(request.getEmail())) {
+            throw new EmailDuplicatedException("El correo electrónico ya está en uso");
+        }
+
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())

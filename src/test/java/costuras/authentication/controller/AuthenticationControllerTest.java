@@ -5,6 +5,7 @@ import costuras.authentication.dto.AutentificacionResponse;
 import costuras.authentication.dto.LoginRequest;
 import costuras.authentication.dto.RegisterRequest;
 import costuras.authentication.excepciones.UsernameDuplicatedException;
+import costuras.authentication.excepciones.EmailDuplicatedException;
 import costuras.authentication.security.JwtService;
 import costuras.authentication.service.AutentificacionService;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,26 @@ class AutentificacionControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    void register_EmailDuplicado_Retorna409() throws Exception {
+
+        RegisterRequest request = new RegisterRequest();
+        request.setUsername("juan123");
+        request.setEmail("juan@mail.com");
+        request.setPassword("pass123");
+
+        doThrow(new EmailDuplicatedException("El correo electrónico ya está en uso"))
+                .when(autentificacionService)
+                .register(any(RegisterRequest.class));
+
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error")
+                        .value("El correo electrónico ya está en uso"));
     }
     
   
