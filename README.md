@@ -506,6 +506,55 @@ Los nuevos archivos deben ubicarse en el paquete correspondiente a su responsabi
 No se deben crear carpetas adicionales sin una necesidad clara.
 
 ---
+# Docker
+
+El proyecto incluye un `Dockerfile` multi-etapa (build con Maven + imagen final `eclipse-temurin:21-jre-alpine`) y un `docker-compose.yml` que levanta el microservicio junto a su base de datos MySQL.
+
+## Servicios definidos en `docker-compose.yml`
+
+- **db**: instancia de `mysql:8.0` con un volumen persistente (`db_data`) y un `healthcheck` mediante `mysqladmin ping`.
+- **app**: construye la imagen a partir del `Dockerfile` local y espera a que `db` esté saludable (`depends_on: condition: service_healthy`) antes de arrancar.
+
+## Variables de entorno
+
+1. Copia el archivo de ejemplo:
+
+```bash
+   cp .env.example .env
+```
+
+2. Ajusta los valores en `.env` (no se sube al repositorio):
+
+   | Variable | Descripción |
+   |---|---|
+   | `DB_NAME` | Nombre de la base de datos |
+   | `DB_USER` | Usuario de MySQL |
+   | `DB_PASSWORD` | Contraseña de MySQL / root |
+   | `JWT_SECRET` | Secreto utilizado para firmar los tokens JWT |
+   | `EUREKA_ENABLED` | `true`/`false`, si el microservicio debe registrarse en Eureka |
+   | `EUREKA_URL` | URL del Eureka Server (solo si `EUREKA_ENABLED=true`) |
+
+## Levantar el entorno
+
+```bash
+docker compose up -d --build
+```
+
+El microservicio quedará disponible en `http://localhost:8080` y MySQL en el puerto `3306`.
+
+```bash
+docker compose down     
+docker compose down -v   
+
+
+
+
+
+
+
+
+
+
 
 # Versionamiento
 
