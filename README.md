@@ -506,6 +506,7 @@ Los nuevos archivos deben ubicarse en el paquete correspondiente a su responsabi
 No se deben crear carpetas adicionales sin una necesidad clara.
 
 ---
+
 # Docker
 
 El proyecto incluye un `Dockerfile` multi-etapa (build con Maven + imagen final `eclipse-temurin:21-jre-alpine`) y un `docker-compose.yml` que levanta el microservicio junto a su base de datos MySQL.
@@ -517,45 +518,81 @@ El proyecto incluye un `Dockerfile` multi-etapa (build con Maven + imagen final 
 
 ## Variables de entorno
 
-1. Copia el archivo de ejemplo:
+Para ejecutar el microservicio mediante Docker Compose es necesario configurar las variables de entorno utilizadas por la aplicación y la base de datos.
+
+El repositorio incluye un archivo `.env.example` que contiene las variables requeridas y sirve como plantilla de configuración.
+
+El archivo `.env` contiene los valores reales de cada entorno y no debe subirse al repositorio, ya que puede contener información sensible como contraseñas y claves JWT.
+
+### 1. Crear el archivo de configuración
+
+Copiar el archivo de ejemplo:
 
 ```bash
-   cp .env.example .env
+cp .env.example .env
 ```
 
-2. Ajusta los valores en `.env` (no se sube al repositorio):
+En Windows, utilizando PowerShell:
 
-   | Variable | Descripción |
-   |---|---|
-   | `DB_NAME` | Nombre de la base de datos |
-   | `DB_USER` | Usuario de MySQL |
-   | `DB_PASSWORD` | Contraseña de MySQL / root |
-   | `JWT_SECRET` | Secreto utilizado para firmar los tokens JWT |
-   | `EUREKA_ENABLED` | `true`/`false`, si el microservicio debe registrarse en Eureka |
-   | `EUREKA_URL` | URL del Eureka Server (solo si `EUREKA_ENABLED=true`) |
+```powershell
+Copy-Item .env.example .env
+```
+
+### 2. Configurar las variables
+
+Abrir el archivo `.env` y reemplazar los valores de ejemplo por los correspondientes al entorno local.
+
+| Variable | Descripción |
+|---|---|
+| `DB_NAME` | Nombre de la base de datos MySQL. |
+| `DB_USER` | Usuario utilizado para conectarse a MySQL. |
+| `DB_PASSWORD` | Contraseña de acceso a MySQL. |
+| `JWT_SECRET` | Clave secreta codificada en Base64 para firmar tokens JWT. |
+| `EUREKA_ENABLED` | Habilita o deshabilita el registro en Eureka (`true` o `false`). |
+| `EUREKA_URL` | Dirección del servidor Eureka. |
+
+La configuración actual de Docker Compose utiliza el usuario `root` de MySQL, por lo que se debe mantener `DB_USER=root`.
+
+Para ejecutar el microservicio únicamente con MySQL mediante Docker Compose, se puede utilizar `EUREKA_ENABLED=false`.
+
+### 3. Protección de credenciales
+
+El archivo `.env` está incluido en `.gitignore` para impedir que sus valores privados se incorporen accidentalmente al repositorio.
+
+El archivo `.env.example` sí se mantiene versionado en GitHub, ya que contiene únicamente valores de ejemplo y permite conocer los requisitos de configuración del proyecto.
+
+---
 
 ## Levantar el entorno
+
+Una vez configurado el archivo `.env`, ejecutar:
 
 ```bash
 docker compose up -d --build
 ```
 
+Este comando construye la imagen del microservicio y levanta los contenedores de la aplicación y MySQL.
+
 El microservicio quedará disponible en `http://localhost:8080` y MySQL en el puerto `3306`.
 
+### Detener los contenedores
+
+Para detener los servicios sin eliminar los datos almacenados:
+
 ```bash
-docker compose down     
-docker compose down -v   
+docker compose down
+```
 
+Para detener los servicios y eliminar también los volúmenes:
 
+```bash
+docker compose down -v
+```
 
+**Advertencia:** el comando `docker compose down -v` elimina también el volumen de MySQL, por lo que se perderán los datos almacenados en ese volumen.
 
-
-
-
-
-
-
-
+---
+ 
 # Versionamiento
 
 Las versiones estables del proyecto se identificarán mediante tags creados sobre `main`.
