@@ -30,6 +30,10 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       EUREKA_ENABLED: ${EUREKA_ENABLED:-false}
       EUREKA_URL: ${EUREKA_URL:-http://eureka:8761/eureka/}
+      ADMIN_ENABLED: ${ADMIN_ENABLED:-false}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
     ports:
       - "8080:8080"
     healthcheck:
