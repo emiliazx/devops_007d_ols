@@ -32,3 +32,57 @@ jobs:
 
       - name: Compilar y ejecutar pruebas
         run: ./mvnw clean verify
+      
+      - name: Construir imagen Docker
+        run: docker build -t authentication:ci .
+      
+      - name: Instalar Snyk CLI
+        run: |
+          npm install -g snyk
+          snyk --version
+
+      - name: Analizar dependencias con Snyk
+        id: snyk_dependencies
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk test --file=pom.xml --severity-threshold=high
+
+      - name: Analizar codigo con Snyk Code
+        if: ${{ success() || (failure() && steps.snyk_dependencies.outcome == 'failure') }}
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk code test --severity-threshold=high
+
+      - name: Preparar variables de entorno de prueba
+        run: |
+          DB_PASSWORD="$(openssl rand -hex 24)"
+          JWT_SECRET="$(openssl rand -base64 32 | tr -d '\n')"
+
+          echo "::add-mask::$DB_PASSWORD"
+          echo "::add-mask::$JWT_SECRET"
+
+          printf 'DB_NAME=authentication\nDB_USER=root\nDB_PASSWORD=%s\nJWT_SECRET=%s\nEUREKA_ENABLED=false\nADMIN_ENABLED=false\n' \
+            "$DB_PASSWORD" "$JWT_SECRET" > .env
+      
+      - name: Desplegar y verificar microservicio
+        run: |
+          docker compose config --quiet
+
+          docker compose up -d --build --wait --wait-timeout 240
+
+          docker compose ps
+
+          curl -fsS --retry 12 --retry-delay 5 --retry-connrefused \
+            http://localhost:8080/actuator/health \
+            | grep -q '"status":"UP"'
+
+          echo "Despliegue y healthcheck completados correctamente"
+      
+      - name: Limpiar entorno de prueba
+        if: always()
+        run: |
+          if [ -f .env ]; then
+            docker compose down -v --remove-orphans
+          else
+            echo "No se genero el entorno de prueba."
+          fi

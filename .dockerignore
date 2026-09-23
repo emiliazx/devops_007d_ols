@@ -1,0 +1,21 @@
+
+# Archivos privados
+.env
+.env.*
+
+# Permitir la plantilla de configuracion
+!.env.example
+
+# Repositorio Git
+.git
+
+# Archivos generados por Maven
+target/
+**/target/
+
+# Configuraciones de editores
+.vscode/
+.idea/
+
+# Archivos temporales
+*.log

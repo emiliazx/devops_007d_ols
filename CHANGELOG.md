@@ -8,6 +8,31 @@ Mientras los cambios permanezcan en desarrollo y no hayan sido integrados en una
 
 ## [Sin publicar]
 
+### Infraestructura y automatización
+
+- Se incorporó Docker Compose para ejecutar el microservicio junto con MySQL.
+- Se agregaron healthchecks para la aplicación y la base de datos.
+- Se configuraron límites de CPU y memoria para los contenedores.
+- Se amplió el pipeline de GitHub Actions con construcción Docker y despliegue temporal de prueba.
+- Se incorporó la verificación automática del endpoint `/actuator/health`.
+- Se configuró la limpieza automática del entorno de prueba.
+
+### Seguridad
+
+- Se incorporó Snyk para analizar dependencias y código fuente.
+- Se configuró Dependabot para Maven, Docker y GitHub Actions.
+- Se protegieron las credenciales mediante variables de entorno.
+- Se eliminaron valores secretos predeterminados de la configuración.
+- Se actualizó el proyecto a Spring Boot 4.0.8 y Spring Cloud 2025.1.3, conservando Eureka.
+- Se actualizaron las dependencias de Jackson y Apache HttpComponents para corregir vulnerabilidades identificadas.
+
+### Validación
+
+- Se verificó la compilación y ejecución de pruebas con Java 21.
+- Se comprobó el funcionamiento de los contenedores de Spring Boot y MySQL.
+- Se validó el estado de salud del microservicio.
+- Se obtuvo una ejecución satisfactoria del pipeline completo de GitHub Actions.
+
 ### Documentación
 
 - Se actualizó `README.md` para reflejar el estado actual del proyecto y las versiones `v1.0.0` y `v1.0.1`.
