@@ -383,83 +383,88 @@ De esta manera GitHub conserva evidencia sobre:
 
 ---
 
-# Integración continua con GitHub Actions
+# Integración continua y validación automatizada con GitHub Actions
 
-El proyecto utiliza **GitHub Actions** para automatizar la validación del código.
+El proyecto utiliza GitHub Actions para automatizar la compilación, las pruebas, los análisis de seguridad y la validación del despliegue del microservicio.
 
 El workflow se encuentra en:
 
 `.github/workflows/ci.yml`
 
-El pipeline utiliza:
-
-- Ubuntu como entorno de ejecución.
-- JDK 21 mediante Temurin.
-- Maven Wrapper.
-- Caché de dependencias Maven.
-- Compilación y ejecución automática de pruebas.
-
-La validación principal se realiza mediante:
-
-```bash
-./mvnw clean verify
-```
-
----
-
 ## Eventos del workflow
 
-El workflow está configurado para ejecutarse ante:
+El pipeline se ejecuta automáticamente ante:
 
-### Push
+- Push hacia `develop`.
+- Push hacia ramas `feature/**` y `ci/**`.
+- Pull Requests dirigidos a `develop` o `main`.
 
-- `develop`
-- `feature/**`
-- `ci/**`
+Esto permite detectar errores antes de integrar los cambios en las ramas principales.
 
-### Pull Request
+## Etapas del pipeline
 
-- `develop`
-- `main`
+El workflow ejecuta las siguientes actividades:
 
-Los eventos adicionales sobre ramas de desarrollo permiten detectar problemas antes de integrar los cambios.
+1. Descarga el código mediante GitHub Actions.
+2. Configura Java 21 utilizando Temurin.
+3. Habilita la ejecución de Maven Wrapper.
+4. Compila el proyecto y ejecuta las pruebas con `./mvnw clean verify`.
+5. Construye la imagen Docker del microservicio.
+6. Instala Snyk CLI.
+7. Analiza las dependencias mediante Snyk Open Source.
+8. Analiza el código fuente mediante Snyk Code.
+9. Genera variables de entorno temporales para las pruebas.
+10. Levanta Spring Boot y MySQL mediante Docker Compose.
+11. Espera a que los contenedores estén saludables.
+12. Comprueba el endpoint `/actuator/health`.
+13. Limpia el entorno de prueba y elimina sus volúmenes temporales.
 
-Los eventos requeridos para el flujo principal son:
+## Análisis de seguridad
 
-`push → develop`
+El pipeline utiliza Snyk para comprobar las dependencias y el código fuente.
 
-y:
+Los análisis se ejecutan con un umbral de severidad alta:
 
-`pull request → main`
+```bash
+snyk test --file=pom.xml --severity-threshold=high
+snyk code test --severity-threshold=high
+```
 
----
+Los hallazgos de severidad alta o crítica pueden bloquear el despliegue de prueba.
 
-## Proceso de validación
+El repositorio utiliza un secreto de GitHub Actions denominado `SNYK_TOKEN` para autenticar los análisis sin almacenar el token en el código fuente.
 
-El pipeline ejecuta las siguientes etapas:
+También se configuró Dependabot para revisar semanalmente las dependencias de Maven, las imágenes Docker y las acciones utilizadas en GitHub Actions.
 
-1. Descarga el código del repositorio.
-2. Configura JDK 21.
-3. Habilita la ejecución del Maven Wrapper.
-4. Compila el proyecto.
-5. Ejecuta las pruebas.
-6. Informa si la validación fue exitosa o fallida.
+## Despliegue temporal y healthchecks
 
-Un resultado exitoso permite continuar con el proceso de revisión y merge.
+Después de superar las validaciones de compilación y seguridad, GitHub Actions crea un archivo `.env` temporal con credenciales generadas para esa ejecución.
 
-Un resultado fallido indica que el cambio debe ser revisado antes de ser integrado.
+Posteriormente, utiliza Docker Compose para construir y levantar el microservicio junto con MySQL.
 
----
+La comprobación principal se realiza mediante:
 
-## Rol dentro de CI/CD
+```bash
+curl http://localhost:8080/actuator/health
+```
 
-El workflow implementado actualmente corresponde principalmente a **Integración Continua (CI)**.
+El estado esperado de la aplicación es `UP`.
 
-GitHub Actions automatiza la compilación y ejecución de pruebas cada vez que ocurre uno de los eventos definidos en el workflow.
+Los contenedores disponen de healthchecks y límites de CPU y memoria. El despliegue espera a que los servicios estén saludables antes de considerarse exitoso.
 
-Esto permite comprobar automáticamente que los cambios puedan integrarse sin romper la compilación o las pruebas existentes.
+En este entorno de prueba, Eureka permanece instalado, pero su registro se deshabilita mediante `EUREKA_ENABLED=false`. La conexión con un servidor Eureka externo debe validarse por separado en el entorno integrado.
 
-Actualmente el pipeline no realiza un despliegue automático hacia un ambiente productivo, por lo que no representa todavía un proceso completo de Continuous Deployment.
+Al finalizar la ejecución, el pipeline elimina los contenedores y volúmenes temporales utilizados durante las pruebas.
+
+## Alcance de CI/CD
+
+El workflow implementa integración continua y una validación automatizada del despliegue en un entorno temporal.
+
+No realiza un despliegue automático hacia producción.
+
+Una ejecución exitosa confirma que el proyecto compiló, superó las pruebas habilitadas, pasó los controles de seguridad configurados y consiguió iniciar correctamente los servicios en Docker.
+
+La integración de los cambios se realiza mediante Pull Requests y revisión del otro integrante del equipo, siguiendo la estrategia GitFlow.
 
 ---
 
