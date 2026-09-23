@@ -32,3 +32,6 @@ jobs:
 
       - name: Compilar y ejecutar pruebas
         run: ./mvnw clean verify
+      
+      - name: Construir imagen Docker
+        run: docker build -t authentication:ci .
