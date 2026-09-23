@@ -621,14 +621,15 @@ No se crean tags sobre ramas `feature`, `develop`, `docs`, `ci` o `refactor`.
 
 ## Estado actual del versionamiento
 
-El repositorio cuenta actualmente con las siguientes versiones estables:
+El historial de versiones estables del proyecto es:
 
 - `v1.0.0`: primera versión estable del microservicio, creada después de integrar los cambios desarrollados y validados en `develop` hacia `main`.
 - `v1.0.1`: versión de corrección creada después de integrar el hotfix `hotfix/corregir-prefijo-bearer` en `main`.
+- `v1.1.0`: versión correspondiente a la Evaluación Parcial 2, que incorpora Docker Compose, automatización CI/CD, análisis de seguridad con Snyk, healthchecks y despliegue temporal de prueba.
 
-Después de integrar el hotfix en `main`, la corrección fue sincronizada nuevamente con `develop` para mantener la rama de desarrollo actualizada.
+La versión `v1.1.0` se prepara mediante una rama de publicación y se identifica con un tag sobre `main` después de completar las validaciones y el merge.
 
-Los cambios realizados después de `v1.0.1` que todavía no correspondan a una nueva versión se mantienen documentados en `CHANGELOG.md` bajo la sección `[Sin publicar]`.
+Los cambios correspondientes a esta versión se encuentran documentados en `CHANGELOG.md` bajo la sección `[1.1.0]`. Los cambios posteriores se registrarán bajo `[Sin publicar]`.
 
 ---
 
