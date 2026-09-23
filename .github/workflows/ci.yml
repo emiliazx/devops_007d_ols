@@ -42,11 +42,13 @@ jobs:
           snyk --version
 
       - name: Analizar dependencias con Snyk
+        id: snyk_dependencies
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: snyk test --file=pom.xml --severity-threshold=high
 
       - name: Analizar codigo con Snyk Code
+        if: ${{ success() || (failure() && steps.snyk_dependencies.outcome == 'failure') }}
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: snyk code test --severity-threshold=high
