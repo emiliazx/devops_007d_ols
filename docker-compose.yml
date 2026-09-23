@@ -3,6 +3,8 @@ services:
     image: mysql:8.0
     container_name: ms-auth-db
     restart: unless-stopped
+    cpus: "1.0"
+    mem_limit: 768m
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
@@ -21,6 +23,8 @@ services:
     build: .
     container_name: ms-auth
     restart: unless-stopped
+    cpus: "1.0"
+    mem_limit: 768m
     environment:
       DB_HOST: db
       DB_PORT: 3306
