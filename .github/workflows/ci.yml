@@ -40,8 +40,8 @@ jobs:
         run: |
           npm install -g snyk
           snyk --version
-      
-            - name: Analizar dependencias con Snyk
+
+      - name: Analizar dependencias con Snyk
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: snyk test --file=pom.xml --severity-threshold=high
