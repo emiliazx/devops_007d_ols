@@ -8,6 +8,10 @@ Mientras los cambios permanezcan en desarrollo y no hayan sido integrados en una
 
 ## [Sin publicar]
 
+---
+
+## [1.1.0] - 2026-09-23
+
 ### Infraestructura y automatización
 
 - Se incorporó Docker Compose para ejecutar el microservicio junto con MySQL.
