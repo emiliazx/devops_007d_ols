@@ -28,7 +28,7 @@ jobs:
         run: npm install -g snyk
 
       - name: Analizar dependencias con Snyk
-        run: snyk test --file=pom.xml --severity-threshold=high || true
+        run: snyk test --debug --log-level=trace
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
