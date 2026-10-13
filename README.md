@@ -778,3 +778,39 @@ El repositorio debe permitir comprender la evolución del proyecto mediante:
 `Ramas → Commits → Pull Requests → Reviews → GitHub Actions → Merge → Versiones`
 
 De esta manera se mantiene un flujo de desarrollo ordenado, trazable y colaborativo.
+
+
+---
+
+##  Calidad, Trazabilidad y Seguridad en el Pipeline CI/CD
+
+El flujo de integración y entrega continua configurado en `.github/workflows/ci.yml` garantiza la calidad y gobernanza del software mediante la siguiente secuencia automatizada:
+
+1. **Pruebas Automatizadas :** Al realizar un `push` o `pull request`, se ejecutan automáticamente las pruebas unitarias Java/Spring Boot con Maven (`./mvnw test`). Si alguna prueba falla, la ejecución se interrumpe inmediatamente.
+2. **Seguridad y Análisis Estático :** Se realiza el escaneo de código y dependencias con Snyk/SonarQube y Dependabot. Si se detectan vulnerabilidades de severidad alta o crítica, el pipeline activa un bloqueo de seguridad y detiene el flujo antes de la fase de compilación final.
+3. **Contenerización y Despliegue Simulado :** Superadas las fases de prueba y seguridad, se construye la imagen de contenedor desde el `Dockerfile` optimizado y se ejecuta el despliegue automático simulado mediante `docker-compose.yml`, asegurando trazabilidad completa desde el commit hasta el contenedor operativo.
+
+---
+
+## Declaración de Uso de Inteligencia Artificial (IA)
+
+En cumplimiento con las indicaciones éticas del encargo:
+
+- **Herramientas utilizadas:** Asistentes de IA ( Gemini).
+- **Alcance y aplicación:** Se utilizó IA de manera exclusiva como herramienta de apoyo para mejorar la sintaxis de los workflows en GitHub Actions, optimizar comandos del `Dockerfile` y estructurar la documentación general del repositorio.
+- **Validación técnica:** Todas las configuraciones, pruebas unitarias y arquitectura de contenedores fueron revisadas, validadas e integradas de forma directa y manual por nosotros.
+
+---
+
+## Reflexiones Individuales 
+
+
+### Reflexión Individual 1
+- Emilia Zamora
+- **Contribución en el proyecto:** Configuración y revisión de pruebas automatizadas, asistencia en la integración del pipeline en GitHub Actions y elaboración de la documentación del proyecto.
+- **Aprendizaje personal:** Durante el desarrollo de esta evaluación aprendí la importancia de automatizar los procesos de prueba y análisis de seguridad dentro de un ciclo de vida DevOps. Comprendí cómo el uso de contenedores con Docker y la orquestación permiten mantener entornos consistentes, evitando errores al desplegar aplicaciones en producción.
+
+### Reflexión Individual 2
+- **Nombre:** Vicente Riquelme
+- **Contribución en el proyecto:** .
+- **Aprendizaje personal:** .
