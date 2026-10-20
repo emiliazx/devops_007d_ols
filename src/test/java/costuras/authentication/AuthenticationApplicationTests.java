@@ -1,11 +1,11 @@
 package costuras.authentication;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest
-@Disabled("Enfoque estricto en pruebas unitarias del controlador")
+@ActiveProfiles("test")
 class AuthenticationApplicationTests {
 
     @Test

@@ -1,0 +1,9 @@
+# Excepción de riesgo temporal y acotada al hallazgo JAXB documentado en T02B/T02C.
+# NO deshabilita Snyk: el resto de hallazgos HIGH/CRITICAL continúa bloqueando CI.
+# Revisar y retirar en cuanto exista una versión corregida de JAXB.
+version: v1.19.0
+ignore:
+  SNYK-JAVA-ORGGLASSFISHJAXB-20883142:
+    - '*':
+        reason: 'Aceptación temporal del riesgo CVE-2026-92877: JAXB transitivo de Hibernate, sin parche publicado; el servicio de autenticación rechaza XML en endpoints examinados (pruebas T02C). La exposición de Hibernate no se descarta. Revisar y retirar al aparecer parche. Responsable: equipo mantenedor DevOps.'
+        expires: '2026-11-20T23:59:59.000Z'

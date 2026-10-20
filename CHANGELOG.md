@@ -8,6 +8,18 @@ Mientras los cambios permanezcan en desarrollo y no hayan sido integrados en una
 
 ## [Sin publicar]
 
+### Estabilización post-merge
+
+- Se ajustó la ejecución de SonarCloud para bloquear Pull Requests y pushes hacia `main`, evitando la consulta no permitida del Quality Gate en pushes directos hacia `develop`.
+- El smoke test Docker Compose mantiene la dependencia de los cuatro controles y se ejecuta en Pull Requests validados y en `main`; la limitación del plan SonarCloud queda documentada.
+
+### Automatización y calidad
+
+- Se separaron build, pruebas, seguridad, SonarCloud, construcción Docker y smoke test Compose en trabajos observables.
+- Se añadió JaCoCo para publicar cobertura XML y esperar el Quality Gate de SonarCloud.
+- Se habilitó la prueba de contexto Spring con H2 y se conservaron las pruebas de rechazo XML.
+- Se eliminó un bypass de errores en el Dockerfile y se configuró runtime no root.
+
 ---
 
 ## [1.1.0] - 2026-09-23
