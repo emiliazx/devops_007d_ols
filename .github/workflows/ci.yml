@@ -52,7 +52,7 @@ jobs:
       - name: Habilitar Maven Wrapper
         run: chmod +x mvnw
       - name: Instalar Snyk CLI
-        run: npm install --global snyk
+        run: npm install --global --ignore-scripts snyk@1.1308.1
       - name: Analizar dependencias con Snyk
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
