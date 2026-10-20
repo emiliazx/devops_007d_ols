@@ -8,6 +8,13 @@ Mientras los cambios permanezcan en desarrollo y no hayan sido integrados en una
 
 ## [Sin publicar]
 
+### Automatización y calidad
+
+- Se separaron build, pruebas, seguridad, SonarCloud, construcción Docker y smoke test Compose en trabajos observables.
+- Se añadió JaCoCo para publicar cobertura XML y esperar el Quality Gate de SonarCloud.
+- Se habilitó la prueba de contexto Spring con H2 y se conservaron las pruebas de rechazo XML.
+- Se eliminó un bypass de errores en el Dockerfile y se configuró runtime no root.
+
 ---
 
 ## [1.1.0] - 2026-09-23

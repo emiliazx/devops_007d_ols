@@ -403,34 +403,42 @@ Esto permite detectar errores antes de integrar los cambios en las ramas princip
 
 ## Etapas del pipeline
 
-El workflow ejecuta las siguientes actividades:
+El workflow separa controles observables en cinco trabajos:
 
-1. Descarga el código mediante GitHub Actions.
-2. Configura Java 21 utilizando Temurin.
-3. Habilita la ejecución de Maven Wrapper.
-4. Compila el proyecto y ejecuta las pruebas con `./mvnw clean verify`.
-5. Construye la imagen Docker del microservicio.
-6. Instala Snyk CLI.
-7. Analiza las dependencias mediante Snyk Open Source.
-8. Analiza el código fuente mediante Snyk Code.
-9. Genera variables de entorno temporales para las pruebas.
-10. Levanta Spring Boot y MySQL mediante Docker Compose.
-11. Espera a que los contenedores estén saludables.
-12. Comprueba el endpoint `/actuator/health`.
-13. Limpia el entorno de prueba y elimina sus volúmenes temporales.
+1. `build-and-test`: Java 21, Maven Wrapper, compilación, pruebas y reporte JaCoCo.
+2. `security`: Snyk Dependencies con umbral `high`; los errores operativos y hallazgos no exceptuados bloquean.
+3. `sonarcloud`: Maven/SonarCloud con cobertura y `sonar.qualitygate.wait=true`.
+4. `docker-build`: construcción verificable de la imagen, separada del despliegue.
+5. `deploy-smoke-test`: solo tras los cuatro trabajos anteriores; genera credenciales efímeras, levanta Compose, espera healthchecks, verifica `/actuator/health` y limpia siempre.
 
 ## Análisis de seguridad
 
-El pipeline utiliza Snyk para comprobar las dependencias y el código fuente.
+El pipeline utiliza Snyk para comprobar dependencias y SonarCloud para análisis de código y Quality Gate.
 
 Los análisis se ejecutan con un umbral de severidad alta:
 
 ```bash
 snyk test --file=pom.xml --severity-threshold=high
-snyk code test --severity-threshold=high
+# SonarCloud se ejecuta desde el job sonarcloud y espera el Quality Gate.
 ```
 
-Los hallazgos de severidad alta o crítica pueden bloquear el despliegue de prueba.
+Los hallazgos de severidad alta o crítica, los errores de autenticación y un Quality Gate rojo bloquean el despliegue de prueba, salvo la excepción temporal y específica de JAXB que se documenta a continuación.
+
+### Excepción temporal por CVE-2026-92877
+
+Snyk identificó la vulnerabilidad **SNYK-JAVA-ORGGLASSFISHJAXB-20883142** (XXE, severidad alta) en `org.glassfish.jaxb:jaxb-core:4.0.9`, recibida transitivamente desde Hibernate/JPA. Al preparar esta versión no se identificó un parche upstream publicado. El proyecto no expone actualmente receptores HTTP XML en las rutas de autenticación examinadas; las pruebas `AuthenticationXmlMediaTypeTest` validan el rechazo HTTP 415 de `application/xml`. **Esta evidencia no demuestra que no exista exposición interna a través de Hibernate.**
+
+Se registra en `.snyk` una **aceptación de riesgo excepcional hasta el 20 de noviembre de 2026 (UTC)**, restringida a ese ID. La regla `'*'` alcanza todas las rutas de dependencia de **ese identificador solamente**, no otras vulnerabilidades. Se mantiene el umbral `high` y los errores del escáner siguen bloqueando CI. El equipo mantenedor debe revisar y retirar la excepción cuando exista una corrección y no renovar el vencimiento sin una nueva evaluación.
+
+Para verificar la diferencia entre el análisis con y sin excepción:
+
+```bash
+snyk test --file=pom.xml --policy-path=.snyk --severity-threshold=high
+snyk test --file=pom.xml --ignore-policy --severity-threshold=high
+```
+
+La segunda instrucción se proporciona **solo para comprobar el riesgo residual**; se espera que falle mientras la vulnerabilidad siga presente. No debe usarse en el trabajo CI de despliegue, que sí considera la política explícita.
+
 
 El repositorio utiliza un secreto de GitHub Actions denominado `SNYK_TOKEN` para autenticar los análisis sin almacenar el token en el código fuente.
 
@@ -462,7 +470,7 @@ El workflow implementa integración continua y una validación automatizada del 
 
 No realiza un despliegue automático hacia producción.
 
-Una ejecución exitosa confirma que el proyecto compiló, superó las pruebas habilitadas, pasó los controles de seguridad configurados y consiguió iniciar correctamente los servicios en Docker.
+Una ejecución exitosa confirma que los controles obligatorios pasaron y que el smoke test temporal consiguió iniciar correctamente los servicios en Docker. La construcción de imagen y el despliegue Compose son etapas distintas.
 
 La integración de los cambios se realiza mediante Pull Requests y revisión del otro integrante del equipo, siguiendo la estrategia GitFlow.
 
@@ -667,7 +675,7 @@ y posteriormente se agrupan bajo la versión correspondiente cuando se crea un t
 
 # Uso de Inteligencia Artificial
 
-Durante el desarrollo de la evaluación se utilizó **ChatGPT, de OpenAI**, como herramienta de apoyo.
+Durante el desarrollo de la evaluación se utilizaron **ChatGPT y Codex (OpenAI)** como herramientas de apoyo. En otra sección del historial del proyecto también se declaró el uso de Gemini; el equipo debe verificar y consolidar la declaración final de herramientas y su alcance antes de entregar.
 
 La herramienta se utilizó principalmente como apoyo para estructurar información, mejorar la presentación de textos y adaptar contenido al formato Markdown, además de las actividades específicas que se detallan a continuación.
 
@@ -782,13 +790,9 @@ De esta manera se mantiene un flujo de desarrollo ordenado, trazable y colaborat
 
 ---
 
-##  Calidad, Trazabilidad y Seguridad en el Pipeline CI/CD
+## Calidad, trazabilidad y seguridad en el pipeline CI/CD
 
-El flujo de integración y entrega continua configurado en `.github/workflows/ci.yml` garantiza la calidad y gobernanza del software mediante la siguiente secuencia automatizada:
-
-1. **Pruebas Automatizadas :** Al realizar un `push` o `pull request`, se ejecutan automáticamente las pruebas unitarias Java/Spring Boot con Maven (`./mvnw test`). Si alguna prueba falla, la ejecución se interrumpe inmediatamente.
-2. **Seguridad y Análisis Estático :** Se realiza el escaneo de código y dependencias con Snyk/SonarQube y Dependabot. Si se detectan vulnerabilidades de severidad alta o crítica, el pipeline activa un bloqueo de seguridad y detiene el flujo antes de la fase de compilación final.
-3. **Contenerización y Despliegue Simulado :** Superadas las fases de prueba y seguridad, se construye la imagen de contenedor desde el `Dockerfile` optimizado y se ejecuta el despliegue automático simulado mediante `docker-compose.yml`, asegurando trazabilidad completa desde el commit hasta el contenedor operativo.
+El workflow configura trabajos separados para build/pruebas, Snyk Dependencies, SonarCloud con Quality Gate, Docker build y smoke test Compose. El último trabajo solo se ejecuta cuando los cuatro controles anteriores terminan correctamente y registra healthchecks, `/actuator/health` y cleanup. Esta validación es temporal y no es producción.
 
 ---
 

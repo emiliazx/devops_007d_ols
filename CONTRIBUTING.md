@@ -156,6 +156,10 @@ Actualmente valida el proyecto utilizando:
 - JDK 21.
 - Maven Wrapper.
 - `./mvnw clean verify`
+- JaCoCo XML para SonarCloud.
+- Snyk Dependencies con umbral `high`.
+- SonarCloud con Quality Gate bloqueante.
+- Construcción Docker y smoke test temporal con Docker Compose.
 
 El pipeline se ejecuta en los eventos definidos en el workflow, incluyendo:
 
@@ -164,6 +168,8 @@ El pipeline se ejecuta en los eventos definidos en el workflow, incluyendo:
 - Pull Requests hacia `main`.
 
 Los cambios no deben integrarse si el pipeline falla.
+
+El smoke test Compose no es un despliegue productivo: utiliza credenciales efímeras, healthchecks y limpieza de volúmenes al finalizar.
 
 ---
 

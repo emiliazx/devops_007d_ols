@@ -5,9 +5,6 @@ FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
 COPY pom.xml .
-
-RUN mvn -B -q dependency:go-offline || true
-
 COPY src ./src
 
 RUN mvn -B -q clean package -DskipTests
@@ -21,7 +18,13 @@ WORKDIR /app
 # Instalar curl para el healthcheck
 RUN apk add --no-cache curl
 
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
 COPY --from=build /app/target/*.jar app.jar
+
+RUN chown appuser:appgroup app.jar
+
+USER appuser
 
 EXPOSE 8080
 
