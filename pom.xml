@@ -21,6 +21,10 @@
 
         <spring-cloud.version>2025.1.3</spring-cloud.version>
 
+        <!-- T02A: overrides de parche para dependencias reportadas por Snyk -->
+        <tomcat.version>11.0.27</tomcat.version>
+        <bouncycastle.version>1.86</bouncycastle.version>
+
         <commons-lang3.version>3.18.0</commons-lang3.version>
 
         <!-- Jackson 2: compatibilidad con JWT -->
@@ -42,6 +46,11 @@
                 <version>${spring-cloud.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
