@@ -7,6 +7,8 @@ Repositorio correspondiente al microservicio de autenticación utilizado como ba
 **Repositorio:** `devops_007d_ols`  
 **Integrantes:** Emilia Zamora y Vicente Riquelme  
 
+**Evaluación Parcial 2 — Evidencias verificables:** consulta la [matriz técnica IE1–IE5](docs/evidencias-ep2.md), el [PR #29 (pipeline completo)](https://github.com/emiliazx/devops_007d_ols/pull/29), el [PR #30 (estabilización)](https://github.com/emiliazx/devops_007d_ols/pull/30) y la [ejecución integral exitosa de GitHub Actions](https://github.com/emiliazx/devops_007d_ols/actions/runs/39487872794).
+
 ---
 
 ## Descripción
@@ -469,6 +471,8 @@ Al finalizar la ejecución, el pipeline elimina los contenedores y volúmenes te
 
 El workflow implementa integración continua y una validación automatizada del despliegue en un entorno temporal.
 
+La matriz técnica de evidencias de la EP2 está disponible en [`docs/evidencias-ep2.md`](docs/evidencias-ep2.md). Los resultados remotos enlazados allí corresponden a ejecuciones verificadas; los cambios posteriores requieren una nueva ejecución.
+
 No realiza un despliegue automático hacia producción.
 
 Una ejecución exitosa confirma que los controles obligatorios pasaron y que el smoke test temporal consiguió iniciar correctamente los servicios en Docker. La construcción de imagen y el despliegue Compose son etapas distintas.
@@ -674,80 +678,28 @@ y posteriormente se agrupan bajo la versión correspondiente cuando se crea un t
 
 ---
 
-# Uso de Inteligencia Artificial
+# Declaración técnica del uso de inteligencia artificial
 
-Durante el desarrollo de la evaluación se utilizaron **ChatGPT y Codex (OpenAI)** como herramientas de apoyo. En otra sección del historial del proyecto también se declaró el uso de Gemini; el equipo debe verificar y consolidar la declaración final de herramientas y su alcance antes de entregar.
+Durante la preparación y desarrollo del repositorio se recurrió a herramientas de inteligencia artificial como apoyo. Esta declaración describe usos observables del trabajo y **debe ser verificada por ambos integrantes antes de la entrega**.
 
-La herramienta se utilizó principalmente como apoyo para estructurar información, mejorar la presentación de textos y adaptar contenido al formato Markdown, además de las actividades específicas que se detallan a continuación.
+- **ChatGPT (OpenAI):** apoyo para comprender GitFlow y GitHub Actions, organizar planes de trabajo, preparar descripciones de commits y Pull Requests, analizar errores registrados en CI, y revisar la presentación de documentación técnica.
+- **Codex (OpenAI):** asistencia para la auditoría del repositorio y la rúbrica, creación de especificaciones y tareas con el método SDD, propuestas y modificaciones de código, pruebas automatizadas, configuración de GitHub Actions y documentación técnica. Las modificaciones quedaron sujetas a pruebas y revisión del equipo.
+- **Gemini:** aparece mencionado en una declaración anterior del repositorio. **Los integrantes deben confirmar si realmente se utilizó y, si corresponde, precisar para qué tareas**, antes de eliminar esta nota o incorporarlo a la declaración definitiva.
 
-El uso de inteligencia artificial estuvo orientado a las siguientes actividades:
+La evidencia de compilación, análisis de seguridad y despliegue se encuentra en [la matriz técnica EP2](docs/evidencias-ep2.md). Las ejecuciones de GitHub Actions y las revisiones humanas deben distinguirse de las sugerencias de las herramientas.
 
-### Mensajes de commit
+**Responsabilidad académica:** las ideas, análisis y justificaciones técnicas que corresponden a los estudiantes deben ser propios y revisados por el equipo. Las conclusiones y reflexiones individuales deben ser redactadas por sus autores, sin apoyo de IA, conforme a las instrucciones de la EP2. Esta declaración no sustituye esa redacción personal.
 
-Se utilizó ChatGPT como apoyo para estructurar y mejorar la redacción de mensajes de commit a partir de cambios ya realizados por los integrantes.
+## Referencias y política académica
 
-Las sugerencias fueron revisadas y ajustadas antes de realizar cada commit.
-
-### Pull Requests
-
-Se utilizó ChatGPT como apoyo para organizar las descripciones de Pull Requests, incluyendo:
-
-- Objetivo.
-- Cambios realizados.
-- Validación.
-- Resultado esperado.
-
-El contenido de cada Pull Request fue revisado por los integrantes antes de su publicación.
-
-### Documentación y formato Markdown
-
-Se utilizó ChatGPT como herramienta de apoyo para organizar y presentar de mejor manera textos previamente redactados por los integrantes del equipo.
-
-Parte de este apoyo consistió en transformar contenidos e ideas desarrolladas por el equipo a una estructura adecuada en formato Markdown, utilizando elementos como:
-
-- Títulos y subtítulos.
-- Listas.
-- Tablas.
-- Bloques de código.
-- Formato para nombres de ramas, comandos y archivos.
-- Organización visual de las distintas secciones del documento.
-
-Este apoyo se utilizó principalmente en la documentación relacionada con:
-
-- `README.md`
-- `CONTRIBUTING.md`
-- `CHANGELOG.md`
-
-También se utilizó la herramienta para mejorar aspectos de claridad, organización y redacción de algunos textos ya desarrollados por los integrantes.
-
-El contenido fue posteriormente revisado y adaptado por el equipo para comprobar que representara correctamente el trabajo realizado en el repositorio.
-
-### Apoyo durante resolución de errores
-
-ChatGPT también se utilizó como herramienta de orientación para interpretar mensajes de error y revisar configuraciones.
-
-Por ejemplo, durante la configuración inicial de GitHub Actions se utilizó como apoyo para identificar una incompatibilidad entre la versión de Java configurada en el pipeline y la versión Java 21 requerida por el proyecto.
-
-Las correcciones fueron implementadas y verificadas por los integrantes mediante nuevas ejecuciones del workflow.
-
-### Validación y responsabilidad
-
-Las sugerencias entregadas por la herramienta fueron revisadas, comprendidas y validadas antes de ser incorporadas.
-
-Las modificaciones al repositorio fueron realizadas, verificadas y versionadas por los integrantes del equipo.
-
-Las reflexiones individuales y conclusiones personales fueron redactadas directamente por cada integrante, respetando las condiciones establecidas para la evaluación.
+- OpenAI. (2026). *ChatGPT* y *Codex* [herramientas de IA].
+- Duoc UC, Bibliotecas. [Uso de inteligencia artificial](https://bibliotecas.duoc.cl/ia).
 
 ---
 
-## Referencias sobre uso de IA
+# Reflexiones históricas sobre colaboración con Git y GitFlow
 
-1. OpenAI. (2026). *ChatGPT* [Modelo de lenguaje generativo].
-2. Duoc UC, Bibliotecas. *Guía institucional sobre uso de Inteligencia Artificial*.
-
----
-
-# Conclusiones y reflexiones individuales
+Los textos personales siguientes ya formaban parte del historial del repositorio y se **conservan sin cambios de redacción**. Están enfocados en Git, GitFlow y trabajo colaborativo; no sustituyen las reflexiones específicas de la Evaluación Parcial 2, centrada en CI/CD, contenedores, seguridad y orquestación.
 
 ## Reflexión de Emilia Zamora
 Sinceramente, antes de esta evaluación usaba Git solo para guardar mi propio avance y no entendia bien cómo organizarse en equipo para no armar un enredo en el repositorio. Pasar a un flujo real me hizo cambiar el perspectiva: entendí el sentido de trabajar con ramas separadas, enviar Pull Requests a develop y ver cómo GitHub Actions testeaba el proyecto para no cometer un gran error con el código
@@ -793,29 +745,22 @@ De esta manera se mantiene un flujo de desarrollo ordenado, trazable y colaborat
 
 ## Calidad, trazabilidad y seguridad en el pipeline CI/CD
 
-El workflow configura trabajos separados para build/pruebas, Snyk Dependencies, SonarCloud con Quality Gate, Docker build y smoke test Compose. El último trabajo solo se ejecuta cuando los cuatro controles anteriores terminan correctamente y registra healthchecks, `/actuator/health` y cleanup. Esta validación es temporal y no es producción.
+El workflow configura trabajos separados para build/pruebas, Snyk Dependencies, SonarCloud con Quality Gate, Docker build y smoke test Compose. En Pull Requests y `main`, el último trabajo solo se ejecuta cuando los cuatro controles anteriores terminan correctamente y registra healthchecks, `/actuator/health` y cleanup. En pushes directos a `develop` se omiten SonarCloud y el smoke test por la limitación documentada de SonarCloud. Esta validación es temporal y no es producción.
 
 ---
 
-## Declaración de Uso de Inteligencia Artificial (IA)
+## Reflexiones individuales — Evaluación Parcial 2
 
-En cumplimiento con las indicaciones éticas del encargo:
+Esta sección contiene únicamente textos redactados por sus integrantes.
 
-- **Herramientas utilizadas:** Asistentes de IA ( Gemini).
-- **Alcance y aplicación:** Se utilizó IA de manera exclusiva como herramienta de apoyo para mejorar la sintaxis de los workflows en GitHub Actions, optimizar comandos del `Dockerfile` y estructurar la documentación general del repositorio.
-- **Validación técnica:** Todas las configuraciones, pruebas unitarias y arquitectura de contenedores fueron revisadas, validadas e integradas de forma directa y manual por nosotros.
+## Reflexión individual EP2 — Emilia Zamora
 
----
+En esta evaluación me encargué de la contenerización del microservicio de autenticación. Escribí el Dockerfile con construcción multi-etapa: una etapa compila el proyecto con Maven y la imagen final usa solo un JRE ligero basado en Alpine, lo que reduce el tamaño y la superficie de ataque. También armé el docker-compose.yml, que levanta el microservicio junto con su base de datos MySQL.
 
-## Reflexiones Individuales 
+En el Compose configuré límites de CPU y memoria para los contenedores, healthchecks para que la aplicación solo arranque cuando la base de datos está lista, y variables de entorno para no dejar contraseñas ni secretos dentro del código. Esto fue la base para que el pipeline pudiera desplegar el entorno simulado de forma automática con docker compose up --wait y verificar el endpoint de salud. En la etapa final de corrección agregué una etiqueta de imagen con el SHA del commit (ms-auth:${IMAGE_TAG}), para tener trazabilidad entre el código y lo desplegado.
 
+## Reflexión individual EP2 — Vicente Riquelme
 
-### Reflexión Individual 1
-- Emilia Zamora
-- **Contribución en el proyecto:** Configuración y revisión de pruebas automatizadas, asistencia en la integración del pipeline en GitHub Actions y elaboración de la documentación del proyecto.
-- **Aprendizaje personal:** Durante el desarrollo de esta evaluación aprendí la importancia de automatizar los procesos de prueba y análisis de seguridad dentro de un ciclo de vida DevOps. Comprendí cómo el uso de contenedores con Docker y la orquestación permiten mantener entornos consistentes, evitando errores al desplegar aplicaciones en producción.
+En esta evaluación me encargué principalmente de trabajar con GitHub Actions para automatizar el pipeline del proyecto, incluyendo la compilación con Maven, las pruebas y la construcción de la imagen Docker. También trabajé con Snyk para revisar vulnerabilidades en las dependencias y el código, además de realizar algunos ajustes en SonarCloud y configurar Dependabot para mantener las dependencias actualizadas.
 
-### Reflexión Individual 2
-- **Nombre:** Vicente Riquelme
-- **Contribución en el proyecto:** .
-- **Aprendizaje personal:** .
+Lo que más me costó fue solucionar los errores que iban apareciendo en el pipeline, sobre todo con Maven y los análisis de seguridad, ya que a veces un cambio arreglaba una cosa, pero fallaba otra. Gracias a eso entendí mejor cómo se conectan estas herramientas y lo importante que es revisar cada etapa para encontrar los problemas. Si tuviera que hacerlo de nuevo, intentaría configurar y probar todo de forma más ordenada desde el principio, para evitar acumular tantos errores al final.
