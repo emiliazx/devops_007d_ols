@@ -396,10 +396,11 @@ El workflow se encuentra en:
 El pipeline se ejecuta automáticamente ante:
 
 - Push hacia `develop`.
+- Push hacia `main`.
 - Push hacia ramas `feature/**` y `ci/**`.
 - Pull Requests dirigidos a `develop` o `main`.
 
-Esto permite detectar errores antes de integrar los cambios en las ramas principales.
+En Pull Requests hacia `develop` o `main` se ejecutan los cinco trabajos, incluido SonarCloud con Quality Gate y el smoke test Compose. En un push hacia `main` también se ejecutan SonarCloud y el despliegue temporal. En un push directo hacia `develop` se mantienen build/pruebas, Snyk y Docker build, pero SonarCloud y el smoke test se omiten explícitamente: la organización de SonarCloud no permite consultar el Quality Gate de ramas no principales en ese evento. Esta limitación no desactiva el control en Pull Requests ni en `main`.
 
 ## Etapas del pipeline
 
@@ -409,7 +410,7 @@ El workflow separa controles observables en cinco trabajos:
 2. `security`: Snyk Dependencies con umbral `high`; los errores operativos y hallazgos no exceptuados bloquean.
 3. `sonarcloud`: Maven/SonarCloud con cobertura y `sonar.qualitygate.wait=true`.
 4. `docker-build`: construcción verificable de la imagen, separada del despliegue.
-5. `deploy-smoke-test`: solo tras los cuatro trabajos anteriores; genera credenciales efímeras, levanta Compose, espera healthchecks, verifica `/actuator/health` y limpia siempre.
+5. `deploy-smoke-test`: solo en Pull Requests validados y en `main`, tras los cuatro trabajos anteriores; genera credenciales efímeras, levanta Compose, espera healthchecks, verifica `/actuator/health` y limpia siempre.
 
 ## Análisis de seguridad
 
@@ -422,7 +423,7 @@ snyk test --file=pom.xml --severity-threshold=high
 # SonarCloud se ejecuta desde el job sonarcloud y espera el Quality Gate.
 ```
 
-Los hallazgos de severidad alta o crítica, los errores de autenticación y un Quality Gate rojo bloquean el despliegue de prueba, salvo la excepción temporal y específica de JAXB que se documenta a continuación.
+Los hallazgos de severidad alta o crítica, los errores de autenticación y un Quality Gate rojo bloquean el despliegue de prueba, salvo la excepción temporal y específica de JAXB que se documenta a continuación. Un push directo a `develop` no consulta el Quality Gate por la limitación de la organización de SonarCloud; la validación bloqueante se conserva en Pull Requests y en `main`.
 
 ### Excepción temporal por CVE-2026-92877
 

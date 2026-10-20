@@ -8,6 +8,11 @@ Mientras los cambios permanezcan en desarrollo y no hayan sido integrados en una
 
 ## [Sin publicar]
 
+### Estabilización post-merge
+
+- Se ajustó la ejecución de SonarCloud para bloquear Pull Requests y pushes hacia `main`, evitando la consulta no permitida del Quality Gate en pushes directos hacia `develop`.
+- El smoke test Docker Compose mantiene la dependencia de los cuatro controles y se ejecuta en Pull Requests validados y en `main`; la limitación del plan SonarCloud queda documentada.
+
 ### Automatización y calidad
 
 - Se separaron build, pruebas, seguridad, SonarCloud, construcción Docker y smoke test Compose en trabajos observables.
