@@ -64,6 +64,24 @@ jobs:
             snyk test --file=pom.xml --severity-threshold=high
           fi
 
+  gitleaks:
+    name: Gitleaks secret scanning
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout completo del historial
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Analizar historial con Gitleaks
+        run: |
+          docker run --rm \
+            --volume "${GITHUB_WORKSPACE}:/repo:ro" \
+            --workdir /repo \
+            ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f \
+            git --redact --exit-code 1 --log-opts="--all" .
+
   sonarcloud:
     name: SonarCloud and Quality Gate
     if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/main' }}
@@ -108,7 +126,7 @@ jobs:
 
   deploy-smoke-test:
     name: Deploy smoke test
-    needs: [build-and-test, security, sonarcloud, docker-build]
+    needs: [build-and-test, security, sonarcloud, docker-build, gitleaks]
     if: ${{ success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/main') }}
     runs-on: ubuntu-latest
     steps:

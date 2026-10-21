@@ -402,21 +402,24 @@ El pipeline se ejecuta automáticamente ante:
 - Push hacia ramas `feature/**` y `ci/**`.
 - Pull Requests dirigidos a `develop` o `main`.
 
-En Pull Requests hacia `develop` o `main` se ejecutan los cinco trabajos, incluido SonarCloud con Quality Gate y el smoke test Compose. En un push hacia `main` también se ejecutan SonarCloud y el despliegue temporal. En un push directo hacia `develop` se mantienen build/pruebas, Snyk y Docker build, pero SonarCloud y el smoke test se omiten explícitamente: la organización de SonarCloud no permite consultar el Quality Gate de ramas no principales en ese evento. Esta limitación no desactiva el control en Pull Requests ni en `main`.
+En Pull Requests hacia `develop` o `main` se ejecutan los seis trabajos, incluido Gitleaks, SonarCloud con Quality Gate y el smoke test Compose. En un push hacia `main` también se ejecutan SonarCloud y el despliegue temporal. En un push directo hacia `develop` se mantienen build/pruebas, Snyk, Gitleaks y Docker build, pero SonarCloud y el smoke test se omiten explícitamente: la organización de SonarCloud no permite consultar el Quality Gate de ramas no principales en ese evento. Esta limitación no desactiva el control en Pull Requests ni en `main`.
 
 ## Etapas del pipeline
 
-El workflow separa controles observables en cinco trabajos:
+El workflow separa controles observables en seis trabajos:
 
 1. `build-and-test`: Java 21, Maven Wrapper, compilación, pruebas y reporte JaCoCo.
 2. `security`: Snyk Dependencies con umbral `high`; los errores operativos y hallazgos no exceptuados bloquean.
-3. `sonarcloud`: Maven/SonarCloud con cobertura y `sonar.qualitygate.wait=true`.
-4. `docker-build`: construcción verificable de la imagen, separada del despliegue.
-5. `deploy-smoke-test`: solo en Pull Requests validados y en `main`, tras los cuatro trabajos anteriores; genera credenciales efímeras, levanta Compose, espera healthchecks, verifica `/actuator/health` y limpia siempre.
+3. `gitleaks`: análisis del historial Git con la imagen oficial `ghcr.io/gitleaks/gitleaks:v8.30.1` fijada por digest; cualquier hallazgo o error operativo bloquea.
+4. `sonarcloud`: Maven/SonarCloud con cobertura y `sonar.qualitygate.wait=true`.
+5. `docker-build`: construcción verificable de la imagen, separada del despliegue.
+6. `deploy-smoke-test`: solo en Pull Requests validados y en `main`, tras los cinco controles anteriores; genera credenciales efímeras, levanta Compose, espera healthchecks, verifica `/actuator/health` y limpia siempre.
 
 ## Análisis de seguridad
 
-El pipeline utiliza Snyk para comprobar dependencias y SonarCloud para análisis de código y Quality Gate.
+El pipeline utiliza Gitleaks para detectar secretos en el historial, Snyk para comprobar dependencias y SonarCloud para análisis de código y Quality Gate.
+
+Gitleaks se ejecuta con `fetch-depth: 0` y analiza todo el historial mediante `git --redact --exit-code 1 --log-opts="--all"`. La salida redacta los secretos; un hallazgo no exceptuado o un error de ejecución detiene el job y evita el despliegue. `.gitleaksignore` contiene únicamente fingerprints históricos aprobados para el identificador público de SonarCloud y valores sintéticos del proyecto académico; no permite omitir reglas, archivos completos ni secretos nuevos. La versión `v8.30.1` está fijada al digest oficial multi-arquitectura de GHCR. La nueva ejecución del PR debe validar esta configuración.
 
 Los análisis se ejecutan con un umbral de severidad alta:
 
@@ -449,7 +452,7 @@ También se configuró Dependabot para revisar semanalmente las dependencias de 
 
 ## Despliegue temporal y healthchecks
 
-Después de superar las validaciones de compilación y seguridad, GitHub Actions crea un archivo `.env` temporal con credenciales generadas para esa ejecución.
+Después de superar las validaciones de compilación, seguridad y secretos, GitHub Actions crea un archivo `.env` temporal con credenciales generadas para esa ejecución.
 
 Posteriormente, utiliza Docker Compose para construir y levantar el microservicio junto con MySQL.
 
@@ -745,7 +748,7 @@ De esta manera se mantiene un flujo de desarrollo ordenado, trazable y colaborat
 
 ## Calidad, trazabilidad y seguridad en el pipeline CI/CD
 
-El workflow configura trabajos separados para build/pruebas, Snyk Dependencies, SonarCloud con Quality Gate, Docker build y smoke test Compose. En Pull Requests y `main`, el último trabajo solo se ejecuta cuando los cuatro controles anteriores terminan correctamente y registra healthchecks, `/actuator/health` y cleanup. En pushes directos a `develop` se omiten SonarCloud y el smoke test por la limitación documentada de SonarCloud. Esta validación es temporal y no es producción.
+El workflow configura seis trabajos separados: build/pruebas, Snyk Dependencies, Gitleaks, SonarCloud con Quality Gate, Docker build y smoke test Compose. En Pull Requests y `main`, el último trabajo solo se ejecuta cuando los cinco controles anteriores terminan correctamente y registra healthchecks, `/actuator/health` y cleanup. En pushes directos a `develop` se omiten SonarCloud y el smoke test por la limitación documentada de SonarCloud. Esta validación es temporal y no es producción.
 
 ---
 

@@ -11,7 +11,13 @@ Mientras los cambios permanezcan en desarrollo y no hayan sido integrados en una
 ### Estabilización post-merge
 
 - Se ajustó la ejecución de SonarCloud para bloquear Pull Requests y pushes hacia `main`, evitando la consulta no permitida del Quality Gate en pushes directos hacia `develop`.
-- El smoke test Docker Compose mantiene la dependencia de los cuatro controles y se ejecuta en Pull Requests validados y en `main`; la limitación del plan SonarCloud queda documentada.
+- El smoke test Docker Compose mantiene la dependencia de los cinco controles previos —build, Snyk, Gitleaks, SonarCloud y Docker— y se ejecuta en Pull Requests validados y en `main`; la limitación del plan SonarCloud queda documentada.
+
+### Seguridad del repositorio
+
+- Se añadió un job independiente de Gitleaks que analiza el historial Git con salida redactada y bloquea el pipeline ante secretos no exceptuados o errores de ejecución.
+- El despliegue temporal depende también de Gitleaks; Dependabot continúa proponiendo actualizaciones sin fusionarlas automáticamente.
+- Se añadieron tres excepciones históricas mediante fingerprints exactos en `.gitleaksignore`; los hallazgos nuevos continúan bloqueando el pipeline.
 
 ### Automatización y calidad
 

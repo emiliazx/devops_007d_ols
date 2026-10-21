@@ -1,0 +1,3 @@
+26b971c4e056af81d610b39cc53f6481466b20d7:.github/workflows/ci.yml:generic-api-key:45
+56a852d2d00e1bcbefcae41065019bc300d29bae:src/test/resources/application-test.properties:generic-api-key:9
+b296d88f1b9d398a93133f9adc6cad1c22054712:src/main/resources/application.properties:generic-api-key:11
