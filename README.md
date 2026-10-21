@@ -419,7 +419,7 @@ El workflow separa controles observables en seis trabajos:
 
 El pipeline utiliza Gitleaks para detectar secretos en el historial, Snyk para comprobar dependencias y SonarCloud para análisis de código y Quality Gate.
 
-Gitleaks se ejecuta con `fetch-depth: 0` y analiza todo el historial mediante `git --redact --exit-code 1 --log-opts="--all"`. La salida redacta los secretos; un hallazgo no exceptuado o un error de ejecución detiene el job y evita el despliegue. No existe una excepción configurada para Gitleaks. La versión `v8.30.1` está fijada al digest oficial multi-arquitectura de GHCR; su ejecución efectiva en CI todavía está pendiente.
+Gitleaks se ejecuta con `fetch-depth: 0` y analiza todo el historial mediante `git --redact --exit-code 1 --log-opts="--all"`. La salida redacta los secretos; un hallazgo no exceptuado o un error de ejecución detiene el job y evita el despliegue. `.gitleaksignore` contiene únicamente fingerprints históricos aprobados para el identificador público de SonarCloud y valores sintéticos del proyecto académico; no permite omitir reglas, archivos completos ni secretos nuevos. La versión `v8.30.1` está fijada al digest oficial multi-arquitectura de GHCR. La nueva ejecución del PR debe validar esta configuración.
 
 Los análisis se ejecutan con un umbral de severidad alta:
 

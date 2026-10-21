@@ -159,6 +159,7 @@ Actualmente valida el proyecto utilizando:
 - JaCoCo XML para SonarCloud.
 - Snyk Dependencies con umbral `high`.
 - Gitleaks sobre el historial Git con salida redactada y bloqueo ante hallazgos.
+- `.gitleaksignore` solo puede contener fingerprints concretos aprobados; no se permiten exclusiones globales.
 - SonarCloud con Quality Gate bloqueante.
 - Construcción Docker y smoke test temporal con Docker Compose.
 

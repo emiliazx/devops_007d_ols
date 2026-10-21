@@ -17,6 +17,7 @@ Mientras los cambios permanezcan en desarrollo y no hayan sido integrados en una
 
 - Se añadió un job independiente de Gitleaks que analiza el historial Git con salida redactada y bloquea el pipeline ante secretos no exceptuados o errores de ejecución.
 - El despliegue temporal depende también de Gitleaks; Dependabot continúa proponiendo actualizaciones sin fusionarlas automáticamente.
+- Se añadieron tres excepciones históricas mediante fingerprints exactos en `.gitleaksignore`; los hallazgos nuevos continúan bloqueando el pipeline.
 
 ### Automatización y calidad
 
