@@ -124,9 +124,98 @@ jobs:
       - name: Construir imagen Docker
         run: docker build --tag ms-auth:${GITHUB_SHA} .
 
+  compliance:
+    name: Compliance audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+      - name: Instalar PyYAML
+        run: pip install pyyaml==6.0.2
+      - name: Auditar manifiestos, pipeline y repositorio
+        run: python3 scripts/auditoria_cumplimiento.py
+
+  k8s-validate:
+    name: Kubernetes manifests validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+      - name: Validar manifiestos de la aplicación (kubeconform)
+        run: |
+          set -euo pipefail
+          kubectl kustomize k8s | docker run --rm -i ghcr.io/yannh/kubeconform:v0.6.7 -strict -summary -
+      - name: Validar manifiestos de monitoreo (kubeconform)
+        run: |
+          set -euo pipefail
+          kubectl kustomize monitoring | docker run --rm -i ghcr.io/yannh/kubeconform:v0.6.7 -strict -summary -
+      - name: Validar reglas de alerta (promtool)
+        run: |
+          docker run --rm --entrypoint promtool \
+            -v "${GITHUB_WORKSPACE}/monitoring/prometheus:/etc/prometheus:ro" \
+            prom/prometheus:v2.55.1 check rules /etc/prometheus/alert-rules.yml
+      - name: Validar configuración de Prometheus (promtool)
+        run: |
+          for f in prometheus.yml prometheus-k8s.yml; do
+            docker run --rm --entrypoint promtool \
+              -v "${GITHUB_WORKSPACE}/monitoring/prometheus/${f}:/etc/prometheus/prometheus.yml:ro" \
+              -v "${GITHUB_WORKSPACE}/monitoring/prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro" \
+              prom/prometheus:v2.55.1 check config /etc/prometheus/prometheus.yml
+          done
+
+  trivy-scan:
+    name: Container image scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+      - name: Construir imagen
+        run: docker build --tag ms-auth:1.1.0 .
+      - name: Escanear imagen (falla ante vulnerabilidades CRITICAL con parche)
+        run: |
+          docker run --rm \
+            --volume /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.58.1 image \
+            --scanners vuln --severity CRITICAL --ignore-unfixed \
+            --exit-code 1 --no-progress ms-auth:1.1.0
+
+  k8s-deploy:
+    name: Kubernetes deploy (kind)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+      - name: Construir imagen
+        run: docker build --tag ms-auth:1.1.0 .
+      - name: Crear cluster Kubernetes (kind)
+        run: |
+          kind create cluster --name ms-auth --wait 120s
+          kind load docker-image ms-auth:1.1.0 --name ms-auth
+      - name: Desplegar aplicación, MySQL y Prometheus
+        run: |
+          set -euo pipefail
+          export DB_PASSWORD="$(openssl rand -hex 24)"
+          export JWT_SECRET="$(openssl rand -base64 48 | tr -d '\n')"
+          echo "::add-mask::$DB_PASSWORD"
+          echo "::add-mask::$JWT_SECRET"
+          ./scripts/deploy-k8s.sh
+      - name: Verificar salud, métricas y scraping
+        run: ./scripts/verificar-observabilidad.sh
+      - name: Diagnóstico ante fallo
+        if: ${{ failure() }}
+        run: |
+          set +e
+          kubectl get pods -A
+          kubectl -n ms-auth describe pods
+          kubectl -n ms-auth logs deployment/ms-auth --tail=200
+          kubectl -n monitoring logs deployment/prometheus --tail=100
+      - name: Eliminar cluster
+        if: ${{ always() }}
+        run: kind delete cluster --name ms-auth
+
   deploy-smoke-test:
     name: Deploy smoke test
-    needs: [build-and-test, security, sonarcloud, docker-build, gitleaks]
+    needs: [build-and-test, security, sonarcloud, docker-build, gitleaks, compliance, k8s-validate, trivy-scan, k8s-deploy]
     if: ${{ success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/main') }}
     runs-on: ubuntu-latest
     steps:

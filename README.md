@@ -767,3 +767,13 @@ En el Compose configuré límites de CPU y memoria para los contenedores, health
 En esta evaluación me encargué principalmente de trabajar con GitHub Actions para automatizar el pipeline del proyecto, incluyendo la compilación con Maven, las pruebas y la construcción de la imagen Docker. También trabajé con Snyk para revisar vulnerabilidades en las dependencias y el código, además de realizar algunos ajustes en SonarCloud y configurar Dependabot para mantener las dependencias actualizadas.
 
 Lo que más me costó fue solucionar los errores que iban apareciendo en el pipeline, sobre todo con Maven y los análisis de seguridad, ya que a veces un cambio arreglaba una cosa, pero fallaba otra. Gracias a eso entendí mejor cómo se conectan estas herramientas y lo importante que es revisar cada etapa para encontrar los problemas. Si tuviera que hacerlo de nuevo, intentaría configurar y probar todo de forma más ordenada desde el principio, para evitar acumular tantos errores al final.
+
+---
+
+## Evaluación Parcial 3 — Monitoreo, Kubernetes y cumplimiento
+
+- Métricas Prometheus en `/actuator/prometheus` y probes en `/actuator/health/liveness|readiness`.
+- Manifiestos Kubernetes en [`k8s/`](k8s/) y monitoreo en [`monitoring/`](monitoring/).
+- Despliegue: `./scripts/deploy-k8s.sh`; verificación: `./scripts/verificar-observabilidad.sh`.
+- Auditoría de cumplimiento: `python3 scripts/auditoria_cumplimiento.py`.
+- Detalle, decisiones y evidencias: [docs/evidencias-ep3.md](docs/evidencias-ep3.md).

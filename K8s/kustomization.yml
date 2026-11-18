@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: ms-auth
+resources:
+  - namespace.yml
+  - configmap.yml
+  - mysql-deployment.yml
+  - mysql-service.yml
+  - app-deployment.yml
+  - app-service.yml
+# Para desplegar en una nube, apuntar al registry propio:
+#   cd k8s && kustomize edit set image ms-auth=REGISTRY/ms-auth:1.1.0
+images:
+  - name: ms-auth
+    newTag: 1.1.0

@@ -18,13 +18,14 @@ WORKDIR /app
 # Instalar curl para el healthcheck
 RUN apk add --no-cache curl
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+# UID/GID numericos fijos: Kubernetes (runAsNonRoot) necesita un usuario numerico
+RUN addgroup -S -g 10001 appgroup && adduser -S -u 10001 -G appgroup appuser
 
 COPY --from=build /app/target/*.jar app.jar
 
 RUN chown appuser:appgroup app.jar
 
-USER appuser
+USER 10001:10001
 
 EXPOSE 8080
 
