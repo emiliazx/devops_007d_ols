@@ -27,11 +27,11 @@
 
         <commons-lang3.version>3.18.0</commons-lang3.version>
 
-        <!-- Jackson 2: compatibilidad con JWT -->
-        <jackson-2-bom.version>2.21.7</jackson-2-bom.version>
+        <!-- Jackson 2: compatibilidad con JWT (parcheado para Snyk) -->
+        <jackson-2-bom.version>2.21.8</jackson-2-bom.version>
 
-        <!-- Jackson 3: utilizado por Spring Boot 4 -->
-        <jackson-bom.version>3.2.3</jackson-bom.version>
+        <!-- Jackson 3: utilizado por Spring Boot 4 (parcheado para Snyk) -->
+        <jackson-bom.version>3.2.4</jackson-bom.version>
 
         <!-- Apache HttpComponents -->
         <httpclient5.version>5.6.4</httpclient5.version>
@@ -56,7 +56,7 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Anotaciones compatibles con Jackson 3.2.3 -->
+        <!-- Anotaciones compatibles con Jackson 3.2.4 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
