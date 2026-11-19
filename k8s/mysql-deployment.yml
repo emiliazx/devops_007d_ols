@@ -2,6 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mysql-data
+  namespace: ms-auth
   labels:
     app.kubernetes.io/name: mysql
     app.kubernetes.io/part-of: ms-auth
@@ -15,6 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mysql
+  namespace: ms-auth
   labels:
     app: mysql
     app.kubernetes.io/name: mysql

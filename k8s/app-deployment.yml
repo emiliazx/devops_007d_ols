@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ms-auth
+  namespace: ms-auth
   labels:
     app: ms-auth
     app.kubernetes.io/name: ms-auth
@@ -50,8 +51,6 @@ spec:
             readOnlyRootFilesystem: true
             capabilities:
               drop: ["ALL"]
-          # nc termina al conectar; no es un proceso de larga duración
-          # (las probes no aplican a initContainers)
       containers:
         - name: ms-auth
           image: ms-auth:1.1.0

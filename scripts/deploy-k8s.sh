@@ -27,7 +27,7 @@ kubectl apply -k monitoring
 echo ">> Esperando rollouts"
 kubectl -n ms-auth rollout status deployment/mysql --timeout=300s
 kubectl -n ms-auth rollout status deployment/ms-auth --timeout=300s
-kubectl -n monitoring rollout status deployment/prometheus --timeout=180s
+kubectl -n monitoring rollout status deployment/prometheus --timeout=240s
 
 kubectl -n ms-auth get pods,svc
 kubectl -n monitoring get pods,svc
