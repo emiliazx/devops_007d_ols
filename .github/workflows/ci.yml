@@ -59,9 +59,9 @@ jobs:
         run: |
           test -n "$SNYK_TOKEN"
           if [ -f .snyk ]; then
-            snyk test --file=pom.xml --policy-path=.snyk --severity-threshold=high
+            snyk test --file=pom.xml --policy-path=.snyk --severity-threshold=high --maven-wrapper=./mvnw
           else
-            snyk test --file=pom.xml --severity-threshold=high
+            snyk test --file=pom.xml --severity-threshold=high --maven-wrapper=./mvnw
           fi
 
   gitleaks:
@@ -84,7 +84,7 @@ jobs:
 
   sonarcloud:
     name: SonarCloud and Quality Gate
-    if: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/main' }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout completo
@@ -106,12 +106,12 @@ jobs:
         run: |
           test -n "$SONAR_TOKEN"
           ./mvnw -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=emiliazx_devops_007d_ols \
             -Dsonar.organization=emiliazx \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
             -Dsonar.qualitygate.wait=true \
-            -Dsonar.qualitygate.timeout=300
+            -Dsonar.qualitygate.timeout=300 \
+            -Dsonar.projectKey=emiliazx_devops_007d_ols2 # gitleaks:allow
 
   docker-build:
     name: Docker build

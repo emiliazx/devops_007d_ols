@@ -3,7 +3,6 @@ kind: Kustomization
 resources:
   - namespace.yml
   - configmap.yml
-  - secret.example.yml
   - app-deployment.yml
   - service.yml
   - mysql-deployment.yml
