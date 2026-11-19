@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - k8s/namespace.yml
+  - k8s/prometheus-rbac.yml
+  - k8s/prometheus-deployment.yml
+  - k8s/prometheus-service.yml
+
+configMapGenerator:
+  - name: prometheus-config
+    namespace: monitoring
+    files:
+      - prometheus.yml=prometheus/prometheus-k8s.yml
+      - alert-rules.yml=prometheus/alert-rules.yml
+
+generatorOptions:
+  disableNameSuffixHash: true

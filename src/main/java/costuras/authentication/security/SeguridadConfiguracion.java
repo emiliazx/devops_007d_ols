@@ -25,7 +25,8 @@ public class SeguridadConfiguracion {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                .requestMatchers("/actuator/prometheus").permitAll()
                 .requestMatchers("/v3/api-docs/**").permitAll()
                 .requestMatchers("/v3/api-docs.yaml").permitAll()
                 .requestMatchers("/swagger-ui/**").permitAll()
