@@ -1,13 +1,10 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-  - namespace.yaml
-  - configmap.yaml
-  - secret.example.yml
-  - app-deployment.yaml
-  - service.yaml
-  - mysql-deployment.yaml
-  - mysql-service.yaml
+  - k8s/namespace.yml
+  - k8s/prometheus-rbac.yml
+  - k8s/prometheus-deployment.yml
+  - k8s/prometheus-service.yml
 
 configMapGenerator:
   - name: prometheus-config

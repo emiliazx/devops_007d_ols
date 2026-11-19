@@ -101,8 +101,9 @@ jobs:
         run: chmod +x mvnw
       - name: Ejecutar pruebas, cobertura y Quality Gate
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           test -n "$SONAR_TOKEN"
           ./mvnw -B clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
