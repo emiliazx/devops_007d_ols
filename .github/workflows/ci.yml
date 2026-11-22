@@ -196,12 +196,19 @@ jobs:
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
+      - name: Descargar cobertura JaCoCo
+        uses: actions/download-artifact@v4
+        with:
+          name: jacoco-report
+          path: .ci-dashboard
       - name: Construir imagen
         run: docker build --tag ms-auth:1.1.0 .
       - name: Crear cluster Kubernetes (kind)
         run: |
           kind create cluster --name ms-auth --wait 120s
           kind load docker-image ms-auth:1.1.0 --name ms-auth
+      - name: Iniciar medición de despliegue kind
+        run: echo "KIND_DEPLOY_START_MS=$(date +%s%3N)" >> "$GITHUB_ENV"
       - name: Desplegar aplicación, MySQL y Prometheus
         run: |
           set -euo pipefail
@@ -212,6 +219,37 @@ jobs:
           ./scripts/deploy-k8s.sh
       - name: Verificar salud, métricas y scraping
         run: ./scripts/verificar-observabilidad.sh
+      - name: Generar tablero IE3 desde Prometheus
+        run: |
+          set -euo pipefail
+          kubectl -n monitoring port-forward svc/prometheus 19090:9090 >/dev/null 2>&1 &
+          prometheus_pid=$!
+          trap 'kill "$prometheus_pid" 2>/dev/null || true' EXIT
+          curl --fail --silent --show-error --retry 20 --retry-delay 1 --retry-connrefused \
+            http://127.0.0.1:19090/-/ready >/dev/null
+          rejection_args=()
+          if [ -n "${HTTP_REJECTION_CODE:-}" ]; then
+            rejection_args+=(--http-rejection-code "$HTTP_REJECTION_CODE")
+          fi
+          if [ -n "${HTTP_REJECTION_INCREMENT:-}" ]; then
+            rejection_args+=(--http-rejection-count "$HTTP_REJECTION_INCREMENT")
+          fi
+          python3 scripts/generar_dashboard.py \
+            --jacoco .ci-dashboard/jacoco.xml \
+            --prometheus-url http://127.0.0.1:19090 \
+            --output ci-dashboard.html \
+            --sha "$GITHUB_SHA" \
+            --run-url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --environment kind \
+            --deploy-start-ms "$KIND_DEPLOY_START_MS" \
+            --deploy-end-ms "$KIND_DEPLOY_END_MS" \
+            "${rejection_args[@]}"
+      - name: Publicar tablero IE3
+        uses: actions/upload-artifact@v4
+        with:
+          name: ie3-dashboard-${{ github.sha }}
+          path: ci-dashboard.html
+          if-no-files-found: error
       - name: Diagnóstico ante fallo
         if: ${{ failure() }}
         run: |
