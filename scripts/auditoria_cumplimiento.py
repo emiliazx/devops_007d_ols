@@ -75,6 +75,26 @@ for job in ("security:", "gitleaks:", "sonarcloud:", "trivy-scan:", "k8s-validat
 check("ci.yml: Snyk bloquea severidad high", "--severity-threshold=high" in ci)
 check("ci.yml: Trivy bloquea CRITICAL", "--exit-code 1" in ci and "CRITICAL" in ci)
 
+def bloque_job(nombre, siguiente=None):
+    bloque = ci.split(f"\n  {nombre}:", 1)[1]
+    if siguiente:
+        bloque = bloque.split(f"\n  {siguiente}:", 1)[0]
+    return bloque
+
+
+comunes = ("build-and-test", "security", "gitleaks", "docker-build",
+           "compliance", "k8s-validate", "trivy-scan")
+kind = bloque_job("k8s-deploy", "deploy-smoke-test")
+smoke = bloque_job("deploy-smoke-test", "ci-gate")
+gate = bloque_job("ci-gate")
+check("ci.yml: kind declara dependencias", "needs: [build-and-test, security, gitleaks, docker-build, compliance, k8s-validate, trivy-scan, sonarcloud]" in kind)
+check("ci.yml: kind exige success de controles comunes", all(f"needs.{job}.result == 'success'" in kind for job in comunes))
+check("ci.yml: kind exige SonarCloud en main", "needs.sonarcloud.result == 'success'" in kind and "github.ref != 'refs/heads/main'" in kind)
+check("ci.yml: smoke exige kind y controles comunes", all(f"needs.{job}.result == 'success'" in smoke for job in comunes + ("k8s-deploy",)))
+check("ci.yml: smoke no exige SonarCloud en PR", "github.event_name == 'pull_request'" in smoke and "needs.sonarcloud.result == 'success'" in smoke)
+check("ci.yml: gate siempre evalua resultados", "name: CI gate" in gate and "if: ${{ always() }}" in gate and "exit 1" in gate)
+check("ci.yml: gate depende de todos los jobs evaluados", all(job in gate.split("needs:", 1)[1].split("\n", 1)[0] for job in comunes + ("sonarcloud", "k8s-deploy", "deploy-smoke-test")))
+
 # --- Repositorio ---
 check(".github/CODEOWNERS existe", (ROOT / ".github/CODEOWNERS").is_file())
 check("plantilla de Pull Request existe", (ROOT / ".github/pull_request_template.md").is_file())
