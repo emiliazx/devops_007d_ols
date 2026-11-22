@@ -224,7 +224,14 @@ jobs:
           set -euo pipefail
           kubectl -n monitoring port-forward svc/prometheus 19090:9090 >/dev/null 2>&1 &
           prometheus_pid=$!
-          trap 'kill "$prometheus_pid" 2>/dev/null || true' EXIT
+          cleanup_prometheus() {
+            if kill "$prometheus_pid" 2>/dev/null; then
+              :
+            else
+              echo "No se pudo detener el port-forward de Prometheus (PID $prometheus_pid)" >&2
+            fi
+          }
+          trap cleanup_prometheus EXIT
           curl --fail --silent --show-error --retry 20 --retry-delay 1 --retry-connrefused \
             http://127.0.0.1:19090/-/ready >/dev/null
           rejection_args=()
