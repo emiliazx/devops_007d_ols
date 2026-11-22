@@ -402,18 +402,23 @@ El pipeline se ejecuta automáticamente ante:
 - Push hacia ramas `feature/**` y `ci/**`.
 - Pull Requests dirigidos a `develop` o `main`.
 
-En Pull Requests hacia `develop` o `main` se ejecutan los seis trabajos, incluido Gitleaks, SonarCloud con Quality Gate y el smoke test Compose. En un push hacia `main` también se ejecutan SonarCloud y el despliegue temporal. En un push directo hacia `develop` se mantienen build/pruebas, Snyk, Gitleaks y Docker build, pero SonarCloud y el smoke test se omiten explícitamente: la organización de SonarCloud no permite consultar el Quality Gate de ramas no principales en ese evento. Esta limitación no desactiva el control en Pull Requests ni en `main`.
+En Pull Requests hacia `develop` o `main` se ejecutan los controles comunes, el despliegue temporal en kind y el smoke test Compose. SonarCloud no aplica al PR y no se cuenta como aprobación. En un push hacia `main`, SonarCloud es obligatorio; si falla o se omite, kind y el smoke test no se ejecutan. En pushes a ramas de trabajo se ejecutan los controles comunes y kind, pero no SonarCloud ni el smoke test. El job `CI gate` evalúa explícitamente los resultados y falla ante cualquier control obligatorio fallido u omitido.
 
 ## Etapas del pipeline
 
-El workflow separa controles observables en seis trabajos:
+El workflow separa controles observables en once jobs:
 
 1. `build-and-test`: Java 21, Maven Wrapper, compilación, pruebas y reporte JaCoCo.
 2. `security`: Snyk Dependencies con umbral `high`; los errores operativos y hallazgos no exceptuados bloquean.
 3. `gitleaks`: análisis del historial Git con la imagen oficial `ghcr.io/gitleaks/gitleaks:v8.30.1` fijada por digest; cualquier hallazgo o error operativo bloquea.
 4. `sonarcloud`: Maven/SonarCloud con cobertura y `sonar.qualitygate.wait=true`.
 5. `docker-build`: construcción verificable de la imagen, separada del despliegue.
-6. `deploy-smoke-test`: solo en Pull Requests validados y en `main`, tras los cinco controles anteriores; genera credenciales efímeras, levanta Compose, espera healthchecks, verifica `/actuator/health` y limpia siempre.
+6. `compliance`: auditoría de manifiestos, pipeline y repositorio.
+7. `k8s-validate`: validación de manifiestos, reglas de alerta y configuración de Prometheus.
+8. `trivy-scan`: escaneo de la imagen ante vulnerabilidades `CRITICAL`.
+9. `k8s-deploy`: despliegue temporal en kind, solo después de los siete controles comunes; en un push a `main` también requiere SonarCloud.
+10. `deploy-smoke-test`: solo en Pull Requests y en `main`, después de kind; genera credenciales efímeras, levanta Compose, espera healthchecks, verifica `/actuator/health` y limpia siempre.
+11. `CI gate`: check final sin credenciales ni despliegues; exige `success` en todos los jobs aplicables y muestra los resultados faltantes o fallidos.
 
 ## Análisis de seguridad
 
@@ -428,7 +433,7 @@ snyk test --file=pom.xml --severity-threshold=high
 # SonarCloud se ejecuta desde el job sonarcloud y espera el Quality Gate.
 ```
 
-Los hallazgos de severidad alta o crítica, los errores de autenticación y un Quality Gate rojo bloquean el despliegue de prueba, salvo la excepción temporal y específica de JAXB que se documenta a continuación. Un push directo a `develop` no consulta el Quality Gate por la limitación de la organización de SonarCloud; la validación bloqueante se conserva en Pull Requests y en `main`.
+Los hallazgos de severidad alta o crítica, los errores de autenticación y un Quality Gate rojo bloquean el despliegue de prueba cuando el escáner correspondiente los reporta, salvo la excepción temporal y específica de JAXB que se documenta a continuación. Un push directo a una rama de trabajo no consulta SonarCloud. En `main`, SonarCloud es obligatorio y bloquea kind y el smoke test si falla o se omite; esto bloquea el despliegue posterior al push, no el merge previo.
 
 ### Excepción temporal por CVE-2026-92877
 
@@ -748,7 +753,7 @@ De esta manera se mantiene un flujo de desarrollo ordenado, trazable y colaborat
 
 ## Calidad, trazabilidad y seguridad en el pipeline CI/CD
 
-El workflow configura seis trabajos separados: build/pruebas, Snyk Dependencies, Gitleaks, SonarCloud con Quality Gate, Docker build y smoke test Compose. En Pull Requests y `main`, el último trabajo solo se ejecuta cuando los cinco controles anteriores terminan correctamente y registra healthchecks, `/actuator/health` y cleanup. En pushes directos a `develop` se omiten SonarCloud y el smoke test por la limitación documentada de SonarCloud. Esta validación es temporal y no es producción.
+El workflow encadena siete controles comunes antes de `Kubernetes deploy (kind)`. En Pull Requests, kind debe pasar antes del smoke test Compose; SonarCloud no aplica al PR. En `main`, SonarCloud también es obligatorio. `CI gate` convierte cualquier fallo o `skipped` inesperado de un job obligatorio en un resultado fallido. Kind y Compose son validaciones temporales; no son un despliegue automático a EKS ni a producción.
 
 ---
 

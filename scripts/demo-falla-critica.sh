@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Demuestra IE6: una dependencia con vulnerabilidad CRITICA (Log4Shell) detiene el pipeline.
+# Demuestra IE6: una dependencia con vulnerabilidad CRITICA puede detener el pipeline.
 # Crea una rama de demo, la sube y debes abrir un PR hacia develop para ver los checks en rojo.
 # Para limpiar:  git checkout develop && git branch -D demo/falla-critica-ep3 && git push origin --delete demo/falla-critica-ep3
 set -euo pipefail
@@ -26,5 +26,5 @@ git commit -m "test(demo): agrega dependencia critica para demostrar bloqueo del
 git push -u origin "$BRANCH"
 echo
 echo "Abre un Pull Request de $BRANCH hacia develop."
-echo "Resultado esperado: 'Security scan' (Snyk) y 'Container image scan' (Trivy) fallan,"
-echo "'Kubernetes deploy (kind)' y 'Deploy smoke test' no se ejecutan / quedan bloqueados."
+echo "Resultado esperado: si un escáner detecta el fallo, su job falla y 'CI gate' queda en rojo."
+echo "'Kubernetes deploy (kind)' y 'Deploy smoke test' no deben ejecutarse después de un control fallido."

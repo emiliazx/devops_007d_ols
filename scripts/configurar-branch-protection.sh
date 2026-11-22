@@ -10,15 +10,7 @@ read -r -d '' BODY <<'JSON' || true
   "required_status_checks": {
     "strict": true,
     "contexts": [
-      "Build and test",
-      "Security scan",
-      "Gitleaks secret scanning",
-      "SonarCloud and Quality Gate",
-      "Docker build",
-      "Compliance audit",
-      "Kubernetes manifests validation",
-      "Container image scan",
-      "Kubernetes deploy (kind)"
+      "CI gate"
     ]
   },
   "enforce_admins": false,

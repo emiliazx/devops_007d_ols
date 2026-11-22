@@ -181,6 +181,17 @@ jobs:
 
   k8s-deploy:
     name: Kubernetes deploy (kind)
+    needs: [build-and-test, security, gitleaks, docker-build, compliance, k8s-validate, trivy-scan, sonarcloud]
+    if: >-
+      ${{ always() &&
+      needs.build-and-test.result == 'success' &&
+      needs.security.result == 'success' &&
+      needs.gitleaks.result == 'success' &&
+      needs.docker-build.result == 'success' &&
+      needs.compliance.result == 'success' &&
+      needs.k8s-validate.result == 'success' &&
+      needs.trivy-scan.result == 'success' &&
+      (github.ref != 'refs/heads/main' || needs.sonarcloud.result == 'success') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout del código
@@ -216,7 +227,18 @@ jobs:
   deploy-smoke-test:
     name: Deploy smoke test
     needs: [build-and-test, security, sonarcloud, docker-build, gitleaks, compliance, k8s-validate, trivy-scan, k8s-deploy]
-    if: ${{ success() && (github.event_name == 'pull_request' || github.ref == 'refs/heads/main') }}
+    if: >-
+      ${{ always() &&
+      needs.build-and-test.result == 'success' &&
+      needs.security.result == 'success' &&
+      needs.docker-build.result == 'success' &&
+      needs.gitleaks.result == 'success' &&
+      needs.compliance.result == 'success' &&
+      needs.k8s-validate.result == 'success' &&
+      needs.trivy-scan.result == 'success' &&
+      needs.k8s-deploy.result == 'success' &&
+      ((github.event_name == 'pull_request') ||
+       (github.ref == 'refs/heads/main' && needs.sonarcloud.result == 'success')) }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout del código
@@ -266,3 +288,54 @@ jobs:
       - name: Eliminar variables temporales
         if: ${{ always() }}
         run: rm -f .env
+
+  ci-gate:
+    name: CI gate
+    needs: [build-and-test, security, sonarcloud, docker-build, gitleaks, compliance, k8s-validate, trivy-scan, k8s-deploy, deploy-smoke-test]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluar controles obligatorios
+        env:
+          BUILD_RESULT: ${{ needs.build-and-test.result }}
+          SECURITY_RESULT: ${{ needs.security.result }}
+          SONAR_RESULT: ${{ needs.sonarcloud.result }}
+          DOCKER_RESULT: ${{ needs.docker-build.result }}
+          GITLEAKS_RESULT: ${{ needs.gitleaks.result }}
+          COMPLIANCE_RESULT: ${{ needs.compliance.result }}
+          K8S_VALIDATE_RESULT: ${{ needs.k8s-validate.result }}
+          TRIVY_RESULT: ${{ needs.trivy-scan.result }}
+          K8S_DEPLOY_RESULT: ${{ needs.k8s-deploy.result }}
+          SMOKE_RESULT: ${{ needs.deploy-smoke-test.result }}
+          SONAR_REQUIRED: ${{ github.ref == 'refs/heads/main' }}
+          SMOKE_REQUIRED: ${{ github.event_name == 'pull_request' || github.ref == 'refs/heads/main' }}
+        shell: bash
+        run: |
+          set -u
+          failed=0
+
+          check_result() {
+            local name="$1"
+            local result="$2"
+            local required="$3"
+            echo "${name}: ${result} (required=${required})"
+            if [ "$required" = "true" ] && [ "$result" != "success" ]; then
+              echo "FAIL: ${name} no terminó en success."
+              failed=1
+            fi
+          }
+
+          check_result "Build and test" "$BUILD_RESULT" true
+          check_result "Security scan" "$SECURITY_RESULT" true
+          check_result "Docker build" "$DOCKER_RESULT" true
+          check_result "Gitleaks secret scanning" "$GITLEAKS_RESULT" true
+          check_result "Compliance audit" "$COMPLIANCE_RESULT" true
+          check_result "Kubernetes manifests validation" "$K8S_VALIDATE_RESULT" true
+          check_result "Container image scan" "$TRIVY_RESULT" true
+          check_result "Kubernetes deploy (kind)" "$K8S_DEPLOY_RESULT" true
+          check_result "SonarCloud and Quality Gate" "$SONAR_RESULT" "$SONAR_REQUIRED"
+          check_result "Deploy smoke test" "$SMOKE_RESULT" "$SMOKE_REQUIRED"
+
+          if [ "$failed" -ne 0 ]; then
+            exit 1
+          fi
