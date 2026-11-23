@@ -1,0 +1,62 @@
+rule_files:
+  - /etc/prometheus/alert-rules.yml
+
+evaluation_interval: 15s
+
+tests:
+  - name: MsAuthCaido estado normal
+    interval: 15s
+    input_series:
+      - series: 'up{job="ms-auth",instance="ms-auth-0"}'
+        values: '1 1 1 1 1 1 1 1 1'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: MsAuthCaido
+        exp_alerts: []
+
+  - name: MsAuthCaido perdida de disponibilidad
+    interval: 15s
+    input_series:
+      - series: 'up{job="ms-auth",instance="ms-auth-0"}'
+        values: '1 0 0 0 0 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 30s
+        alertname: MsAuthCaido
+        exp_alerts: []
+
+  - name: MsAuthCaido entra en firing tras un minuto
+    interval: 15s
+    input_series:
+      - series: 'up{job="ms-auth",instance="ms-auth-0"}'
+        values: '1 0 0 0 0 0 0 0 0'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: MsAuthCaido
+        exp_alerts:
+          - exp_labels:
+              instance: ms-auth-0
+              job: ms-auth
+              severity: critical
+            exp_annotations:
+              summary: "Instancia de ms-auth sin responder (ms-auth-0)"
+              description: "Prometheus no puede leer /actuator/prometheus hace más de 1 minuto."
+
+  - name: MsAuthCaido se recupera
+    interval: 15s
+    input_series:
+      - series: 'up{job="ms-auth",instance="ms-auth-0"}'
+        values: '1 0 0 0 0 0 0 0 0 1 1 1 1 1'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: MsAuthCaido
+        exp_alerts:
+          - exp_labels:
+              instance: ms-auth-0
+              job: ms-auth
+              severity: critical
+            exp_annotations:
+              summary: "Instancia de ms-auth sin responder (ms-auth-0)"
+              description: "Prometheus no puede leer /actuator/prometheus hace más de 1 minuto."
+      - eval_time: 3m
+        alertname: MsAuthCaido
+        exp_alerts: []
