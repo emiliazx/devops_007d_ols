@@ -43,7 +43,13 @@ En el runner Linux del workflow:
 ./scripts/verificar-observabilidad.sh
 ```
 
-La auditoría de manifiestos y reglas se ejecuta mediante `k8s-validate` con kubeconform y promtool. La demostración del disparo y recuperación de alertas todavía está pendiente.
+La auditoría de manifiestos y reglas se ejecuta mediante `k8s-validate` con kubeconform y promtool. En el PR #41, `promtool test rules` terminó en `SUCCESS` y se validó la configuración de seis reglas. Las pruebas de activación y recuperación usan métricas simuladas; no demuestran una interrupción real ni una alerta observada en Kubernetes.
+
+**Evidencia verificada en PR #41**
+
+- [PR #41 — evidencias de logs y alertas](https://github.com/emiliazx/devops_007d_ols/pull/41)
+- [Run 45251193234](https://github.com/emiliazx/devops_007d_ols/actions/runs/45251193234): se consultaron 50 líneas de cada uno de los dos pods de `ms-auth`, 45 líneas del pod de MySQL y Prometheus informó `up{job="ms-auth"} = 1`.
+- Esta ejecución verificó el cambio dentro del PR; el PR todavía está pendiente de merge, por lo que no se presenta como integración definitiva.
 
 **Evidencias remotas relacionadas**
 
@@ -113,6 +119,7 @@ La validación formal de manifiestos se ejecuta con kubeconform en `k8s-validate
 - Prometheus y sus alertas aportan información para observar y diagnosticar disponibilidad, recursos, latencia y errores; los controles de CI/CD —Snyk, Trivy, Gitleaks, pruebas, auditoría y SonarCloud— son los que bloquean automáticamente el despliegue mediante `CI gate` cuando corresponde.
 - El incidente de Snyk en rojo y el bloqueo de kind se documentan en [Run 45041247591](https://github.com/emiliazx/devops_007d_ols/actions/runs/45041247591); la ejecución exitosa posterior se documenta en [Run 45052748283](https://github.com/emiliazx/devops_007d_ols/actions/runs/45052748283).
 - PR #39 y el dashboard agregan trazabilidad entre SHA, ejecución, duración, cobertura y métricas observadas.
+- En [PR #41](https://github.com/emiliazx/devops_007d_ols/pull/41), [Run 45251193234](https://github.com/emiliazx/devops_007d_ols/actions/runs/45251193234) verificó logs consultables, `promtool test rules`, `up{job="ms-auth"} = 1` y `CI gate: success`. Estas son evidencias del PR; su integración definitiva queda condicionada al merge pendiente.
 
 Esta sección describe la integración técnica. Las decisiones personales, conclusiones y reflexiones deben ser redactadas por cada integrante en la plantilla al final.
 
@@ -122,6 +129,7 @@ Esta sección describe la integración técnica. Las decisiones personales, conc
 - [PR #39 — implementación del dashboard](https://github.com/emiliazx/devops_007d_ols/pull/39)
 - [Run 45041247591 — fallo real de Snyk y bloqueo del despliegue](https://github.com/emiliazx/devops_007d_ols/actions/runs/45041247591)
 - [Run 45052748283 — controles y despliegues temporales exitosos](https://github.com/emiliazx/devops_007d_ols/actions/runs/45052748283)
+- [PR #41 — evidencias de logs y alertas](https://github.com/emiliazx/devops_007d_ols/pull/41), con [Run 45251193234](https://github.com/emiliazx/devops_007d_ols/actions/runs/45251193234) exitoso
 
 ### IE5 — Cumplimiento, auditoría, seguridad y protección de ramas
 
@@ -193,8 +201,8 @@ La auditoría actual comprueba la presencia de los jobs, los umbrales, las depen
 
 Estas piezas no se deben presentar como comprobadas hasta obtenerlas:
 
-- Capturas o artefactos de logs de `ms-auth` y MySQL, redactados y sin credenciales ni datos de usuarios.
-- Pruebas de disparo y recuperación de las alertas de Prometheus, incluyendo qué estado se observó y durante cuánto tiempo.
+- Una interrupción real en Kubernetes que active y luego recupere `MsAuthCaido`; el PR #41 solo verificó ese ciclo con métricas simuladas mediante `promtool`.
+- La integración definitiva de los cambios del PR #41 después del merge; el `CI gate` exitoso del run demuestra la ejecución del PR, no que el PR ya esté integrado.
 - Aclaración de la rúbrica sobre el requisito cloud del IE2. El código actual demuestra `kind` temporal en GitHub Actions, no EKS ni AWS.
 - Capturas del artefacto `ie3-dashboard-*` y de los jobs relevantes en [Run 45077004638](https://github.com/emiliazx/devops_007d_ols/actions/runs/45077004638), aunque el run se documenta como exitoso.
 - Confirmación de la revisión de la excepción vencida de `.snyk`; no debe renovarse solo para hacer verde el pipeline.
