@@ -154,6 +154,11 @@ jobs:
           docker run --rm --entrypoint promtool \
             -v "${GITHUB_WORKSPACE}/monitoring/prometheus:/etc/prometheus:ro" \
             prom/prometheus:v2.55.1 check rules /etc/prometheus/alert-rules.yml
+      - name: Probar ciclo de MsAuthCaido con promtool
+        run: |
+          docker run --rm --entrypoint promtool \
+            -v "${GITHUB_WORKSPACE}/monitoring/prometheus:/etc/prometheus:ro" \
+            prom/prometheus:v2.55.1 test rules /etc/prometheus/alert-tests.yml
       - name: Validar configuración de Prometheus (promtool)
         run: |
           for f in prometheus.yml prometheus-k8s.yml; do
@@ -219,6 +224,8 @@ jobs:
           ./scripts/deploy-k8s.sh
       - name: Verificar salud, métricas y scraping
         run: ./scripts/verificar-observabilidad.sh
+      - name: Verificar logs anonimizados de ms-auth y MySQL
+        run: bash scripts/verificar-logs-k8s.sh
       - name: Generar tablero IE3 desde Prometheus
         run: |
           set -euo pipefail
@@ -263,8 +270,7 @@ jobs:
           set +e
           kubectl get pods -A
           kubectl -n ms-auth describe pods
-          kubectl -n ms-auth logs deployment/ms-auth --tail=200
-          kubectl -n monitoring logs deployment/prometheus --tail=100
+          bash scripts/verificar-logs-k8s.sh
       - name: Eliminar cluster
         if: ${{ always() }}
         run: kind delete cluster --name ms-auth
