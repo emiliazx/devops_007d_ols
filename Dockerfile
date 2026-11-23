@@ -7,7 +7,23 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-RUN mvn -B -q clean package -DskipTests
+ARG MAVEN_DOWNLOAD_ATTEMPTS=3
+RUN set -eu; \
+    attempt=1; \
+    while [ "$attempt" -le "$MAVEN_DOWNLOAD_ATTEMPTS" ]; do \
+      log="$(mktemp)"; \
+      if mvn -B -q -Dmaven.wagon.http.retryHandler.count=2 clean package -DskipTests >"$log" 2>&1; then \
+        cat "$log"; rm -f "$log"; exit 0; \
+      else \
+        status=$?; \
+      fi; \
+      if [ "$attempt" -ge "$MAVEN_DOWNLOAD_ATTEMPTS" ] || ! grep -Eiq '429|HTTP 5[0-9][0-9]|timed out|Connection reset|Connection refused|Temporary failure in name resolution' "$log"; then \
+        cat "$log" >&2; rm -f "$log"; exit "$status"; \
+      fi; \
+      echo "Maven download transient failure; retry $((attempt + 1))/$MAVEN_DOWNLOAD_ATTEMPTS after $((attempt * 15))s" >&2; \
+      rm -f "$log"; sleep $((attempt * 15)); attempt=$((attempt + 1)); \
+    done; \
+    echo "ERROR: Maven Docker build exhausted $MAVEN_DOWNLOAD_ATTEMPTS attempts" >&2; exit 1
 
 
 # ---- Etapa 2: imagen final liviana ----
