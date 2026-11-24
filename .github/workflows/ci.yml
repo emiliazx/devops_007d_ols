@@ -445,6 +445,7 @@ jobs:
       - name: Disparar compilación de OpenShift
         env:
           OPENSHIFT_BUILD_WEBHOOK: ${{ secrets.OPENSHIFT_BUILD_WEBHOOK }}
+          OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
@@ -452,11 +453,16 @@ jobs:
             echo "ERROR: falta el secreto OPENSHIFT_BUILD_WEBHOOK" >&2
             exit 1
           fi
+          if [ -z "$OPENSHIFT_TOKEN" ]; then
+            echo "ERROR: falta el secreto OPENSHIFT_TOKEN" >&2
+            exit 1
+          fi
 
           if ! response_code="$(curl --silent --output /dev/null --write-out '%{http_code}' \
             --connect-timeout 10 --max-time 30 \
             --request POST \
             --header 'Content-Type: application/json' \
+            --header "Authorization: Bearer ${OPENSHIFT_TOKEN}" \
             --data '{}' \
             "$OPENSHIFT_BUILD_WEBHOOK")"; then
             echo "ERROR: no fue posible contactar el webhook de OpenShift" >&2
