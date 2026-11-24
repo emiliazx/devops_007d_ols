@@ -1,7 +1,7 @@
 # Evidencias técnicas — Evaluación 3
 
 **Repositorio:** [emiliazx/devops_007d_ols](https://github.com/emiliazx/devops_007d_ols)  
-**Rama de documentación:** `docs/ep3-evidencias`  
+**Rama de documentación:** `docs/ep3-cierre-final`
 **Alcance:** esta matriz sigue la rúbrica IE1–IE6 de la Evaluación Parcial 3. Relaciona la implementación visible en el repositorio con las evidencias remotas indicadas, pero no sustituye las capturas que la evaluación solicite ni redacta las reflexiones personales de los integrantes.
 
 ## Cómo leer las evidencias
@@ -49,12 +49,13 @@ La auditoría de manifiestos y reglas se ejecuta mediante `k8s-validate` con kub
 
 - [PR #41 — evidencias de logs y alertas](https://github.com/emiliazx/devops_007d_ols/pull/41)
 - [Run 45251193234](https://github.com/emiliazx/devops_007d_ols/actions/runs/45251193234): se consultaron 50 líneas de cada uno de los dos pods de `ms-auth`, 45 líneas del pod de MySQL y Prometheus informó `up{job="ms-auth"} = 1`.
-- Esta ejecución verificó el cambio dentro del PR; el PR todavía está pendiente de merge, por lo que no se presenta como integración definitiva.
+- PR #41 fue fusionado; esta ejecución verificó sus cambios antes de la integración definitiva.
 
 **Evidencias remotas relacionadas**
 
 - [Run 45052748283 — controles y despliegues temporales exitosos](https://github.com/emiliazx/devops_007d_ols/actions/runs/45052748283)
 - [Run 45077004638 — dashboard generado con datos reales de Prometheus y JaCoCo](https://github.com/emiliazx/devops_007d_ols/actions/runs/45077004638)
+- [PR #41 — logs y pruebas de alertas fusionados](https://github.com/emiliazx/devops_007d_ols/pull/41)
 
 ### IE2 — Despliegue automatizado del microservicio en un entorno orquestado
 
@@ -93,6 +94,7 @@ La validación formal de manifiestos se ejecuta con kubeconform en `k8s-validate
 - El job `build-and-test` de [`ci.yml`](../.github/workflows/ci.yml) publica `target/site/jacoco/jacoco.xml` como artefacto `jacoco-report`.
 - `k8s-deploy` descarga JaCoCo, mide el tiempo de despliegue, consulta Prometheus antes de borrar el clúster y publica `ie3-dashboard-${{ github.sha }}`.
 - La duración se mide desde después de crear/cargar el clúster kind hasta que la comprobación de `/actuator/health` devuelve `UP`. No incluye la creación del clúster, la compilación ni la espera posterior de métricas.
+- El rediseño visual del dashboard fue fusionado en [PR #42](https://github.com/emiliazx/devops_007d_ols/pull/42); conserva las mismas fuentes y definiciones técnicas de JaCoCo y Prometheus.
 
 **Métricas conservadas del dashboard**
 
@@ -108,7 +110,9 @@ La validación formal de manifiestos se ejecuta con kubeconform en `k8s-validate
 **Evidencias remotas**
 
 - [PR #39 — implementación del dashboard](https://github.com/emiliazx/devops_007d_ols/pull/39)
-- [Run 45077004638 — dashboard generado con datos reales de Prometheus y JaCoCo](https://github.com/emiliazx/devops_007d_ols/actions/runs/45077004638)
+- [PR #42 — rediseño visual del dashboard fusionado](https://github.com/emiliazx/devops_007d_ols/pull/42)
+- [Run 45077004638 — primer dashboard generado con datos reales de Prometheus y JaCoCo](https://github.com/emiliazx/devops_007d_ols/actions/runs/45077004638) — evidencia histórica.
+- [Run 45282262828 — dashboard rediseñado integrado en `develop`](https://github.com/emiliazx/devops_007d_ols/actions/runs/45282262828), con el artefacto `ie3-dashboard-4a5efab869d12f7cba61f940589603f8384e0e06`.
 
 ### IE4 — Integración entre monitoreo, decisiones, incidentes y mejora continua
 
@@ -119,7 +123,8 @@ La validación formal de manifiestos se ejecuta con kubeconform en `k8s-validate
 - Prometheus y sus alertas aportan información para observar y diagnosticar disponibilidad, recursos, latencia y errores; los controles de CI/CD —Snyk, Trivy, Gitleaks, pruebas, auditoría y SonarCloud— son los que bloquean automáticamente el despliegue mediante `CI gate` cuando corresponde.
 - El incidente de Snyk en rojo y el bloqueo de kind se documentan en [Run 45041247591](https://github.com/emiliazx/devops_007d_ols/actions/runs/45041247591); la ejecución exitosa posterior se documenta en [Run 45052748283](https://github.com/emiliazx/devops_007d_ols/actions/runs/45052748283).
 - PR #39 y el dashboard agregan trazabilidad entre SHA, ejecución, duración, cobertura y métricas observadas.
-- En [PR #41](https://github.com/emiliazx/devops_007d_ols/pull/41), [Run 45251193234](https://github.com/emiliazx/devops_007d_ols/actions/runs/45251193234) verificó logs consultables, `promtool test rules`, `up{job="ms-auth"} = 1` y `CI gate: success`. Estas son evidencias del PR; su integración definitiva queda condicionada al merge pendiente.
+- En [PR #41](https://github.com/emiliazx/devops_007d_ols/pull/41), [Run 45251193234](https://github.com/emiliazx/devops_007d_ols/actions/runs/45251193234) verificó logs consultables, `promtool test rules`, `up{job="ms-auth"} = 1` y `CI gate: success`; PR #41 fue fusionado posteriormente.
+- [PR #40](https://github.com/emiliazx/devops_007d_ols/pull/40) documentó las evidencias de EP3 y fue fusionado.
 
 Esta sección describe la integración técnica. Las decisiones personales, conclusiones y reflexiones deben ser redactadas por cada integrante en la plantilla al final.
 
@@ -127,8 +132,13 @@ Esta sección describe la integración técnica. Las decisiones personales, conc
 
 - [PR #37 — implementación del bloqueo del pipeline](https://github.com/emiliazx/devops_007d_ols/pull/37)
 - [PR #39 — implementación del dashboard](https://github.com/emiliazx/devops_007d_ols/pull/39)
+- [PR #40 — documentación EP3 fusionada](https://github.com/emiliazx/devops_007d_ols/pull/40)
+- [PR #41 — logs y pruebas de alertas fusionados](https://github.com/emiliazx/devops_007d_ols/pull/41)
+- [PR #42 — rediseño visual del dashboard fusionado](https://github.com/emiliazx/devops_007d_ols/pull/42)
+- [PR #43 — reintentos seguros de Maven fusionados](https://github.com/emiliazx/devops_007d_ols/pull/43)
 - [Run 45041247591 — fallo real de Snyk y bloqueo del despliegue](https://github.com/emiliazx/devops_007d_ols/actions/runs/45041247591)
 - [Run 45052748283 — controles y despliegues temporales exitosos](https://github.com/emiliazx/devops_007d_ols/actions/runs/45052748283)
+- [Run 45282262828 — `develop` exitosa después del PR #43](https://github.com/emiliazx/devops_007d_ols/actions/runs/45282262828): Snyk, compilación, Trivy, validación Kubernetes, kind y `CI gate` correctos.
 - [PR #41 — evidencias de logs y alertas](https://github.com/emiliazx/devops_007d_ols/pull/41), con [Run 45251193234](https://github.com/emiliazx/devops_007d_ols/actions/runs/45251193234) exitoso
 
 ### IE5 — Cumplimiento, auditoría, seguridad y protección de ramas
@@ -148,6 +158,7 @@ Esta sección describe la integración técnica. Las decisiones personales, conc
 
 - `develop` aparece protegida en GitHub. Esta constatación no se amplía a checks, aprobaciones u otras reglas concretas que no estén documentadas aquí.
 - El push posterior al merge del PR #39 terminó exitosamente en `develop` en [Run 45193880500](https://github.com/emiliazx/devops_007d_ols/actions/runs/45193880500).
+- El push posterior al merge del PR #43 terminó exitosamente en `develop` en [Run 45282262828](https://github.com/emiliazx/devops_007d_ols/actions/runs/45282262828), con Snyk, compilación, Trivy, validación Kubernetes, kind y `CI gate` correctos.
 
 **Validación reproducible**
 
@@ -164,9 +175,11 @@ La auditoría local no sustituye la comprobación administrativa de las reglas d
 - [PR #37 — implementación del bloqueo del pipeline](https://github.com/emiliazx/devops_007d_ols/pull/37)
 - [PR #38 — actualización y exclusión de dependencias vulnerables](https://github.com/emiliazx/devops_007d_ols/pull/38)
 - [PR #39 — implementación del dashboard](https://github.com/emiliazx/devops_007d_ols/pull/39)
+- [PR #43 — reintentos seguros de Maven fusionados](https://github.com/emiliazx/devops_007d_ols/pull/43)
 - [Run 45041247591 — Snyk en rojo y despliegue bloqueado](https://github.com/emiliazx/devops_007d_ols/actions/runs/45041247591)
 - [Run 45052748283 — controles y despliegues temporales exitosos](https://github.com/emiliazx/devops_007d_ols/actions/runs/45052748283)
 - [Run 45077004638 — artefacto del dashboard](https://github.com/emiliazx/devops_007d_ols/actions/runs/45077004638)
+- [Run 45282262828 — `develop` exitosa después del PR #43](https://github.com/emiliazx/devops_007d_ols/actions/runs/45282262828)
 
 ### IE6 — Validación automática y bloqueo ante fallas críticas
 
@@ -183,8 +196,10 @@ En [`ci.yml`](../.github/workflows/ci.yml):
 **Evidencias remotas**
 
 - [PR #37 — implementación del bloqueo del pipeline](https://github.com/emiliazx/devops_007d_ols/pull/37)
+- [PR #43 — reintentos seguros de Maven fusionados](https://github.com/emiliazx/devops_007d_ols/pull/43)
 - [Run 45041247591 — fallo real de Snyk y bloqueo del despliegue](https://github.com/emiliazx/devops_007d_ols/actions/runs/45041247591)
 - [Run 45052748283 — controles y despliegues temporales exitosos](https://github.com/emiliazx/devops_007d_ols/actions/runs/45052748283)
+- [Run 45282262828 — Snyk, compilación, Trivy, Kubernetes, kind y `CI gate` correctos](https://github.com/emiliazx/devops_007d_ols/actions/runs/45282262828)
 
 **Validación reproducible**
 
@@ -202,9 +217,9 @@ La auditoría actual comprueba la presencia de los jobs, los umbrales, las depen
 Estas piezas no se deben presentar como comprobadas hasta obtenerlas:
 
 - Una interrupción real en Kubernetes que active y luego recupere `MsAuthCaido`; el PR #41 solo verificó ese ciclo con métricas simuladas mediante `promtool`.
-- La integración definitiva de los cambios del PR #41 después del merge; el `CI gate` exitoso del run demuestra la ejecución del PR, no que el PR ya esté integrado.
 - Aclaración de la rúbrica sobre el requisito cloud del IE2. El código actual demuestra `kind` temporal en GitHub Actions, no EKS ni AWS.
-- Capturas del artefacto `ie3-dashboard-*` y de los jobs relevantes en [Run 45077004638](https://github.com/emiliazx/devops_007d_ols/actions/runs/45077004638), aunque el run se documenta como exitoso.
+- Protección administrativa de `main`, incluidos sus checks y reglas concretas.
+- Capturas del dashboard rediseñado, del artefacto `ie3-dashboard-4a5efab869d12f7cba61f940589603f8384e0e06` y de los jobs relevantes en [Run 45282262828](https://github.com/emiliazx/devops_007d_ols/actions/runs/45282262828).
 - Confirmación de la revisión de la excepción vencida de `.snyk`; no debe renovarse solo para hacer verde el pipeline.
 
 ## Plantilla de autoría personal
