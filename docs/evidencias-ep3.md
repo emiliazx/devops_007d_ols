@@ -1,13 +1,13 @@
 # Evidencias técnicas — Evaluación 3
 
 **Repositorio:** [emiliazx/devops_007d_ols](https://github.com/emiliazx/devops_007d_ols)  
-**Rama de documentación:** `docs/ep3-cierre-final`
+**Rama de documentación:** `docs/ep3-openshift-cloud`
 **Alcance:** esta matriz sigue la rúbrica IE1–IE6 de la Evaluación Parcial 3. Relaciona la implementación visible en el repositorio con las evidencias remotas indicadas, pero no sustituye las capturas que la evaluación solicite ni redacta las reflexiones personales de los integrantes.
 
 ## Cómo leer las evidencias
 
 - Los enlaces a PR y ejecuciones apuntan a GitHub; deben abrirse para capturar el estado, los jobs y los artefactos visibles en cada ejecución.
-- `kind` es un clúster Kubernetes temporal creado dentro de un runner de GitHub Actions. El repositorio no demuestra un despliegue en EKS, AWS, Render ni otra nube.
+- `kind` es un clúster Kubernetes temporal creado dentro de un runner de GitHub Actions. Además, el 24 de noviembre de 2026 se comprobó un despliegue manual en Red Hat OpenShift Service on AWS mediante Developer Sandbox; no se presenta como infraestructura productiva permanente.
 - El workflow actual conserva once jobs: `build-and-test`, `security`, `gitleaks`, `sonarcloud`, `docker-build`, `compliance`, `k8s-validate`, `trivy-scan`, `k8s-deploy`, `deploy-smoke-test` y `CI gate`.
 - SonarCloud se ejecuta únicamente cuando el workflow recibe un push a `main`. No se cuenta un `skipped` como aprobación.
 
@@ -24,6 +24,8 @@
 - [`scripts/verificar-observabilidad.sh`](../scripts/verificar-observabilidad.sh) comprueba `/actuator/health`, las métricas expuestas, el scraping `up{job="ms-auth"}` y las reglas cargadas.
 - La misma verificación captura el código de rechazo real de `/info` sin autenticación (`401` o `403`), exige que se repita en cinco peticiones y espera el contador correspondiente en Prometheus.
 - Las reglas de [`monitoring/prometheus/alert-rules.yml`](../monitoring/prometheus/alert-rules.yml) cubren disponibilidad, errores 5xx, errores en logs, CPU, heap y latencia.
+- En OpenShift se creó el `ServiceMonitor ms-auth-monitor` en el proyecto `vixo-six-dev`. La recolección se verificó desde **Observar → Métricas** con `sum(up{namespace="vixo-six-dev",job="ms-auth"})`, cuyo resultado fue `2`, correspondiente a las dos réplicas monitoreadas.
+- Esta evidencia usa el monitoreo disponible en OpenShift mediante `ServiceMonitor`; no afirma que Prometheus instalado por los manifiestos de [`monitoring/`](../monitoring/) esté funcionando en OpenShift.
 
 **Métricas y significado**
 
@@ -68,7 +70,20 @@ La auditoría de manifiestos y reglas se ejecuta mediante `k8s-validate` con kub
 
 **Alcance cloud**
 
-Actualmente solo se ha verificado el despliegue temporal en Kubernetes `kind` dentro de GitHub Actions, además del smoke test temporal con Compose. No hay configuración ni evidencia suficiente para afirmar un despliegue en EKS, AWS, Render u otra nube. La aclaración del requisito cloud del IE2 queda pendiente.
+Además del despliegue temporal en Kubernetes `kind` dentro de GitHub Actions y del smoke test con Compose, se comprobó un despliegue real y manual en Red Hat OpenShift Service on AWS mediante Developer Sandbox gratuito.
+
+**Evidencia comprobada en OpenShift — 24/11/2026**
+
+- Proyecto: `vixo-six-dev`; usuario autenticado: `vixo-six`; código fuente: rama `develop`.
+- La compilación Docker `ms-auth-1` terminó en `Complete` y la imagen `ms-auth:1.1.0` se construyó y publicó en el registro interno de OpenShift.
+- `Deployment/mysql`: `1/1 Available`, usando MySQL 8; `Deployment/ms-auth`: `2/2 Available`.
+- Los dos pods de `ms-auth` estaban en `Running`, sin reinicios en la última comprobación.
+- La base de datos fue `authentication` y el usuario de aplicación `authuser`; las credenciales se almacenaron en Kubernetes Secrets y sus valores no se documentan.
+- Readiness: `/actuator/health/readiness`; liveness: `/actuator/health/liveness`; el rollout de `ms-auth` terminó correctamente.
+- El servicio `ms-auth` es interno en el puerto 8080. La Route HTTPS pública respondió `UP` en [`/actuator/health`](https://ms-auth-vixo-six-dev.apps.rm3.7wse.p1.openshiftapps.com/actuator/health) con `{"groups":["liveness","readiness"],"status":"UP"}`.
+- El despliegue fue manual desde la consola y la terminal web de OpenShift. GitHub Actions continúa desplegando automáticamente solo el entorno temporal `kind`, no OpenShift.
+
+Developer Sandbox es temporal y no equivale a una plataforma productiva permanente. La confirmación formal del profesor sobre el requisito cloud del IE2 permanece pendiente.
 
 **Validación reproducible**
 
@@ -81,6 +96,26 @@ kubectl kustomize monitoring
 ```
 
 La validación formal de manifiestos se ejecuta con kubeconform en `k8s-validate`; `kubectl kustomize` por sí solo no prueba un despliegue remoto.
+
+**Comandos reproducibles de OpenShift**
+
+En la terminal web autenticada, con el proyecto seleccionado y sin imprimir secretos:
+
+```bash
+oc project vixo-six-dev
+oc get deployment mysql ms-auth
+oc get pods -l deployment=ms-auth -o wide
+oc get route ms-auth
+oc get servicemonitor ms-auth-monitor
+oc get --raw "/apis/monitoring.coreos.com/v1/namespaces/vixo-six-dev/servicemonitors/ms-auth-monitor" \
+  | jq '{name: .metadata.name, namespace: .metadata.namespace, endpoints: .spec.endpoints}'
+```
+
+La consulta de métricas se realizó desde **Observar → Métricas** con:
+
+```text
+sum(up{namespace="vixo-six-dev",job="ms-auth"})
+```
 
 **Evidencia remota relacionada**
 
@@ -125,6 +160,8 @@ La validación formal de manifiestos se ejecuta con kubeconform en `k8s-validate
 - PR #39 y el dashboard agregan trazabilidad entre SHA, ejecución, duración, cobertura y métricas observadas.
 - En [PR #41](https://github.com/emiliazx/devops_007d_ols/pull/41), [Run 45251193234](https://github.com/emiliazx/devops_007d_ols/actions/runs/45251193234) verificó logs consultables, `promtool test rules`, `up{job="ms-auth"} = 1` y `CI gate: success`; PR #41 fue fusionado posteriormente.
 - [PR #40](https://github.com/emiliazx/devops_007d_ols/pull/40) documentó las evidencias de EP3 y fue fusionado.
+- En OpenShift, `ms-auth` se conecta al servicio interno de MySQL mediante la configuración del proyecto, sus probes informan disponibilidad al orquestador y el `ServiceMonitor` permite que el monitoreo de la plataforma recoja `/actuator/prometheus` de las dos réplicas.
+- La integración OpenShift fue ejecutada manualmente; no forma todavía parte de un despliegue automático de GitHub Actions.
 
 Esta sección describe la integración técnica. Las decisiones personales, conclusiones y reflexiones deben ser redactadas por cada integrante en la plantilla al final.
 
@@ -217,7 +254,10 @@ La auditoría actual comprueba la presencia de los jobs, los umbrales, las depen
 Estas piezas no se deben presentar como comprobadas hasta obtenerlas:
 
 - Una interrupción real en Kubernetes que active y luego recupere `MsAuthCaido`; el PR #41 solo verificó ese ciclo con métricas simuladas mediante `promtool`.
-- Aclaración de la rúbrica sobre el requisito cloud del IE2. El código actual demuestra `kind` temporal en GitHub Actions, no EKS ni AWS.
+- Confirmación del profesor sobre cómo se evalúa el despliegue cloud del IE2. OpenShift Developer Sandbox fue comprobado, pero es temporal y no equivale a infraestructura productiva permanente.
+- Automatización de ese despliegue OpenShift desde GitHub Actions; actualmente el workflow automatiza `kind`, no OpenShift.
+- Activación y recuperación de alertas en OpenShift; las pruebas existentes con `promtool` usan métricas simuladas.
+- Persistencia de MySQL después de recrear su pod.
 - Protección administrativa de `main`, incluidos sus checks y reglas concretas.
 - Capturas del dashboard rediseñado, del artefacto `ie3-dashboard-4a5efab869d12f7cba61f940589603f8384e0e06` y de los jobs relevantes en [Run 45282262828](https://github.com/emiliazx/devops_007d_ols/actions/runs/45282262828).
 - Confirmación de la revisión de la excepción vencida de `.snyk`; no debe renovarse solo para hacer verde el pipeline.
