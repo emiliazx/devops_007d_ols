@@ -777,8 +777,24 @@ Lo que más me costó fue solucionar los errores que iban apareciendo en el pipe
 
 ## Evaluación Parcial 3 — Monitoreo, Kubernetes y cumplimiento
 
-- Métricas Prometheus en `/actuator/prometheus` y probes en `/actuator/health/liveness|readiness`.
-- Manifiestos Kubernetes en [`k8s/`](k8s/) y monitoreo en [`monitoring/`](monitoring/).
-- Despliegue: `./scripts/deploy-k8s.sh`; verificación: `./scripts/verificar-observabilidad.sh`.
-- Auditoría de cumplimiento: `python3 scripts/auditoria_cumplimiento.py`.
-- Detalle, decisiones y evidencias: [docs/evidencias-ep3.md](docs/evidencias-ep3.md).
+- Prometheus, Micrometer y Actuator exponen métricas del microservicio, disponibilidad, recursos y errores; los logs de `ms-auth` y MySQL se consultan de forma acotada y sin publicar secretos ni datos de usuarios.
+- El dashboard HTML se genera automáticamente desde GitHub Actions con JaCoCo, duración del despliegue, CPU del proceso Java, heap de la JVM y errores HTTP. La CPU del proceso y el heap no se presentan como consumo total del pod.
+- GitHub Actions despliega temporalmente en Kubernetes `kind` después de los controles obligatorios y ejecuta las verificaciones de salud y observabilidad.
+- También se comprobó un despliegue real y manual en Red Hat OpenShift Developer Sandbox, sobre Red Hat OpenShift Service on AWS, en el proyecto `vixo-six-dev`: MySQL, dos réplicas de `ms-auth`, probes de readiness/liveness y acceso HTTPS mediante Route.
+- El `ServiceMonitor` permitió observar las dos réplicas desde el monitoreo de OpenShift con `sum(up{namespace="vixo-six-dev",job="ms-auth"})`, cuyo resultado fue `2`. Esta comprobación usa el monitoreo disponible de la plataforma, no afirma que los manifiestos Prometheus del repositorio estén instalados en OpenShift.
+- Se mantienen dos reglas permanentes de alertas, `MsAuthCaido` y `MsAuthReplicasInsuficientes`. Además, la alerta temporal `MsAuthPruebaMonitoreo` llegó a `Firing` sin detener la aplicación y posteriormente fue eliminada; esto no demuestra recuperación automática por normalización de la condición.
+- Snyk, Trivy, Gitleaks, SonarCloud, la auditoría de cumplimiento y `CI gate` continúan formando parte de los controles del pipeline.
+- Se propuso conectar GitHub Actions con OpenShift mediante el secreto `OPENSHIFT_BUILD_WEBHOOK`. El job fue agregado en el [PR #46](https://github.com/emiliazx/devops_007d_ols/pull/46), ya fusionado; todavía falta verificarlo en una ejecución posterior y no se afirma que el despliegue automático hacia OpenShift ya funcione.
+- La documentación completa, sus limitaciones y las evidencias detalladas están en [docs/evidencias-ep3.md](docs/evidencias-ep3.md). La integración documental y los cambios asociados se incorporaron mediante el [PR #45](https://github.com/emiliazx/devops_007d_ols/pull/45), ya fusionado.
+
+## Reflexiones individuales — Evaluación Parcial 3
+
+Estas reflexiones fueron revisadas y aprobadas por ambos integrantes.
+
+### Reflexión individual EP3 — Emilia Zamora
+
+En esta evaluación trabajé principalmente con la observabilidad y el dashboard. Al principio veía Prometheus como otra herramienta que había que configurar, pero sinceramente me di cuenta de que lo importante era entender qué estaba pasando con la aplicación y no solamente comprobar que funcionaba. Revisar las métricas de Micrometer, los estados de Actuator y los errores HTTP me ayudó a relacionar señales que antes miraba por separado. También participé en la idea de generar el dashboard automáticamente desde GitHub Actions, con la cobertura de JaCoCo y los datos del despliegue, para tener una evidencia más clara durante la presentación. Me costó entender cómo se conectaban las métricas con las alertas y con los resultados del pipeline. Al final aprendí que observar bien permite tomar mejores decisiones y detectar problemas antes de que se conviertan en fallas difíciles de explicar.
+
+### Reflexión individual EP3 — Vicente Riquelme
+
+En esta evaluación trabajé con Kubernetes, los manifiestos y el despliegue automatizado en `kind`. También revisé cómo los controles de seguridad, cumplimiento y `CI gate` podían detener una integración antes de llegar al despliegue. Una dificultad importante fue entender si `kind` cumplía con lo que el profesor esperaba como entorno cloud, así que investigué alternativas y encontré Red Hat OpenShift Developer Sandbox como una opción gratuita sobre AWS. En ese entorno pude desplegar MySQL y dos réplicas de `ms-auth`, usar Secrets, revisar probes y publicar una Route HTTPS. También logré conectar el monitoreo mediante un `ServiceMonitor`, comprobar las métricas y activar una alerta de prueba. El webhook de GitHub Actions hacia OpenShift todavía queda por verificar. Al final, investigar una solución diferente me ayudó a comprender mejor Kubernetes, sus servicios y las diferencias entre un entorno temporal y un despliegue cloud más real.
